@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bobcats — statistiky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #DC1F26;
+  --red-soft: #FCEBEB;
+  --red-dark: #501313;
+  --black: #1A1A1A;
+  --bg: #F8F8F7;
+  --surface: #FFFFFF;
+  --surface-alt: #F1EFE8;
+  --text: #1A1A1A;
+  --text-muted: #5F5E5A;
+  --text-subtle: #888780;
+  --border: rgba(26, 26, 26, 0.1);
+  --border-strong: rgba(26, 26, 26, 0.2);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+.hero {
+  background: var(--black);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 5px;
+  background: var(--red);
+}
+.hero .brand { display: flex; align-items: center; gap: 16px; }
+.hero .logo { width: 56px; height: 56px; flex-shrink: 0; }
+.hero .logo img { width: 100%; height: 100%; object-fit: contain; filter: invert(1); }
+.hero .wordmark {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 38px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.hero .wordmark .accent { color: var(--red); }
+.hero .meta-line {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.hero .right { display: flex; align-items: center; gap: 12px; }
+.hero select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 30px 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='white' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.hero select:hover { background-color: rgba(255, 255, 255, 0.15); }
+
+.row { display: grid; gap: 12px; }
+.metrics { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 16px; }
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.metric.accent::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--red);
+}
+.metric .lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.metric .val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+.metric .sub { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+
+.grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 16px; }
+@media (min-width: 720px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-top: 16px;
+}
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 14px;
+}
+.card-title h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+.card-title .meta {
+  font-size: 11px;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lb table { width: 100%; font-size: 13px; border-collapse: collapse; }
+.lb th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-subtle);
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.lb td { padding: 10px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.lb tr:last-child td { border-bottom: none; }
+.lb .num { text-align: right; font-variant-numeric: tabular-nums; }
+.lb .pos {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--text-subtle);
+  width: 28px;
+}
+.lb .pos.gold { color: var(--red); }
+.lb .player { display: flex; align-items: center; gap: 10px; }
+.lb .player .name { font-weight: 500; }
+.lb .player .meta { font-size: 11px; color: var(--text-subtle); }
+.av {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  background: var(--red-soft);
+  color: var(--red-dark);
+}
+.av.alt { background: var(--black); color: #fff; }
+.av img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.match-row {
+  display: grid;
+  grid-template-columns: 1fr 50px 50px 70px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.match-row:last-child { border-bottom: none; }
+.match-row .score {
+  text-align: center;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.match-row .badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-block;
+}
+.match-row .badge.w { background: var(--red); color: #fff; }
+.match-row .badge.l { background: var(--surface-alt); color: var(--text-muted); }
+.match-row .badge.t { background: var(--surface-alt); color: var(--text-muted); }
+.match-row .res { text-align: right; }
+
+.tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--red-soft);
+  color: var(--red-dark);
+  margin-left: 6px;
+  font-weight: 500;
+  vertical-align: 1px;
+}
+.tag.alt { background: var(--surface-alt); color: var(--text-muted); }
+
+.empty, .loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.empty .ico, .loading .ico { font-size: 32px; opacity: 0.4; margin-bottom: 8px; display: block; }
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.chart-wrap { position: relative; width: 100%; height: 220px; }
+
+.footer {
+  text-align: center;
+  margin-top: 24px;
+  padding: 16px 0;
+  font-size: 11px;
+  color: var(--text-subtle);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 480px) {
+  .hero { padding: 18px 20px; flex-direction: column; align-items: flex-start; }
+  .hero .wordmark { font-size: 32px; }
+  .hero .logo { width: 48px; height: 48px; }
+  .metric .val { font-size: 26px; }
+  .card { padding: 14px 16px; }
+  .lb th, .lb td { padding: 6px 4px; }
+  .lb th:nth-child(4), .lb td:nth-child(4) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="brand">
+      <div class="logo"><img src="bobcats-logo.png" alt="Bobcats logo"></div>
+      <div>
+        <div class="wordmark"><span class="accent">BOB</span>CATS</div>
+        <div class="meta-line" id="hero-sub">Sezóna 2026 · Statistiky</div>
+      </div>
+    </div>
+    <div class="right">
+      <select id="team-picker" aria-label="Vyber tým"></select>
+    </div>
+  </header>
+
+  <div id="content">
+    <div class="loading">
+      <div class="spinner"></div>
+      Načítám statistiky…
+    </div>
+  </div>
+
+  <footer class="footer">Bobcats stats · powered by Google Sheets</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============================================================
+//  Konfigurace — Apps Script deployment URL
+// ============================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxq-2I7KqIaE-S7mriXsJ-9s5OjCzFcmpVEMVVG4kGtuns5STvRDjAQi9HdRWyeOvkX/exec';
+
+// JSONP wrapper kvůli cross-origin GET (script.google.com → github.io)
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    const sc = document.createElement('script');
+    const tm = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
+    function cleanup() { clearTimeout(tm); delete window[cbName]; if (sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    sc.onerror = () => { cleanup(); reject(new Error('Script error')); };
+    const qs = Object.entries({ ...params, callback: cbName })
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join('&');
+    sc.src = `${GAS_URL}?${qs}`;
+    document.head.appendChild(sc);
+  });
+}
+
+// ============================================================
+//  Helpers
+// ============================================================
+function initials(name) {
+  if (!name) return '?';
+  return name.split(/\s+/).map(s => s[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function avatarHTML(player, altIdx) {
+  const klass = (altIdx % 2 === 0) ? '' : ' alt';
+  const photo = player.photoUrl;
+  if (photo) return `<span class="av${klass}"><img src="${escapeAttr(photo)}" alt=""></span>`;
+  return `<span class="av${klass}">${escapeHTML(initials(player.name))}</span>`;
+}
+
+function escapeHTML(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+function escapeAttr(s) { return escapeHTML(s); }
+
+function formatDateCz(s) {
+  // očekává cz formát "12. 5. 2026" — jen vykresli; pokud je to ISO/jiný, ponech
+  return s;
+}
+
+function emptyState(msg) {
+  return `<div class="card"><div class="empty"><span class="ico">📊</span>${escapeHTML(msg)}</div></div>`;
+}
+
+// ============================================================
+//  Render — public stats
+// ============================================================
+function renderPublic(data, team) {
+  if (!data || !data.team) return emptyState('Pro tento tým zatím nejsou žádná data.');
+  const r = data.record;
+  const p = data.points;
+
+  const recordVal = r.ties > 0 ? `${r.wins}–${r.losses}–${r.ties}` : `${r.wins}–${r.losses}`;
+
+  // Sekce: metriky
+  const metricsHTML = `
+    <div class="row metrics">
+      <div class="metric accent"><div class="lbl">Bilance</div><div class="val">${recordVal}</div><div class="sub">W — L${r.ties ? ' — T' : ''}</div></div>
+      <div class="metric accent"><div class="lbl">Body za</div><div class="val">${p.for}</div><div class="sub">${p.forAvg} / zápas</div></div>
+      <div class="metric"><div class="lbl">Body proti</div><div class="val">${p.against}</div><div class="sub">${p.againstAvg} / zápas</div></div>
+      <div class="metric"><div class="lbl">Zápasů</div><div class="val">${r.matches}</div><div class="sub">v sezóně</div></div>
+    </div>`;
+
+  // Top scoreři
+  const topRows = data.topScorers.map((pl, i) => `
+    <tr>
+      <td class="pos${i === 0 ? ' gold' : ''}">${i + 1}</td>
+      <td>
+        <div class="player">
+          ${avatarHTML(pl, i)}
+          <div>
+            <div class="name">${escapeHTML(pl.name)}</div>
+            <div class="meta">${escapeHTML(pl.pos)}${pl.jersey ? ' · #' + escapeHTML(pl.jersey) : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">${pl.totalTd}</td>
+      <td class="num">${pl.wr.rec}</td>
+      <td class="num">${pl.wr.yds}</td>
+      <td class="num">${pl.totalPts}</td>
+    </tr>
+  `).join('');
+
+  const topHTML = data.topScorers.length === 0 ? '' : `
+    <div class="card lb">
+      <div class="card-title"><h3>Top scoreři</h3><span class="meta">body celkem</span></div>
+      <table>
+        <thead><tr><th></th><th>Hráč</th><th class="num">TD</th><th class="num">REC</th><th class="num">YDS</th><th class="num">PTS</th></tr></thead>
+        <tbody>${topRows}</tbody>
+      </table>
+    </div>`;
+
+  // TDs chart + Defense
+  const defRows = data.defenseLeaders.map((pl, i) => `
+    <tr>
+      <td>
+        <div class="player">
+          ${avatarHTML(pl, i)}
+          <span class="name">${escapeHTML(pl.name)}</span>
+          <span class="tag alt">DB</span>
+        </div>
+      </td>
+      <td class="num">${pl.db.flagPull}</td>
+      <td class="num">${pl.db.sack}</td>
+      <td class="num">${pl.db.int}</td>
+    </tr>
+  `).join('');
+
+  const grid2HTML = `
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><h3>Touchdowny</h3><span class="meta">${r.matches} zápasů</span></div>
+        <div class="chart-wrap"><canvas id="tdChart" role="img" aria-label="Sloupcový graf počtu touchdownů per hráč"></canvas></div>
+      </div>
+      <div class="card lb">
+        <div class="card-title"><h3>Defenze</h3><span class="meta">FP / SACK / INT</span></div>
+        ${data.defenseLeaders.length === 0 ? '<div class="empty">Žádné defenzivní statistiky.</div>' : `
+          <table>
+            <thead><tr><th>Hráč</th><th class="num">FP</th><th class="num">SACK</th><th class="num">INT</th></tr></thead>
+            <tbody>${defRows}</tbody>
+          </table>`}
+      </div>
+    </div>`;
+
+  // Recent matches
+  const matchRows = data.recentMatches.map(m => `
+    <div class="match-row">
+      <span>${escapeHTML(formatDateCz(m.date))} · ${escapeHTML(m.opponent)}</span>
+      <span class="score">${m.ourScore}</span>
+      <span class="score">${m.oppScore}</span>
+      <span class="res">
+        <span class="badge ${m.result === 'W' ? 'w' : m.result === 'L' ? 'l' : 't'}">
+          ${m.result === 'W' ? 'Výhra' : m.result === 'L' ? 'Prohra' : 'Remíza'}
+        </span>
+      </span>
+    </div>
+  `).join('');
+
+  const matchesHTML = data.recentMatches.length === 0 ? '' : `
+    <div class="card">
+      <div class="card-title"><h3>Poslední zápasy</h3><span class="meta">posledních ${data.recentMatches.length}</span></div>
+      ${matchRows}
+    </div>`;
+
+  document.getElementById('content').innerHTML = metricsHTML + topHTML + grid2HTML + matchesHTML;
+
+  // TDs chart
+  if (data.tdsByPlayer.length > 0) {
+    new Chart(document.getElementById('tdChart'), {
+      type: 'bar',
+      data: {
+        labels: data.tdsByPlayer.map(p => p.name.split(' ')[0]),
+        datasets: [{ data: data.tdsByPlayer.map(p => p.td), backgroundColor: '#DC1F26', borderRadius: 4, borderSkipped: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { displayColors: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { beginAtZero: true, ticks: { stepSize: 2, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  }
+
+  // Update hero subtitle
+  document.getElementById('hero-sub').textContent = `Sezóna 2026 · ${team}`;
+}
+
+// ============================================================
+//  Init
+// ============================================================
+async function loadTeams() {
+  try {
+    const res = await jsonp({ action: 'getTeams' });
+    return (res && res.teams) || [];
+  } catch (e) {
+    console.error('getTeams failed:', e);
+    return [];
+  }
+}
+
+async function loadAndRender(team) {
+  document.getElementById('content').innerHTML = `<div class="loading"><div class="spinner"></div>Načítám statistiky…</div>`;
+  try {
+    const data = await jsonp({ action: 'publicStats', team });
+    renderPublic(data, team);
+  } catch (e) {
+    console.error('publicStats failed:', e);
+    document.getElementById('content').innerHTML = `
+      <div class="card">
+        <div class="empty">
+          <span class="ico">⚠</span>
+          Nepodařilo se načíst data.<br>
+          <small style="color:var(--text-subtle)">${escapeHTML(e.message)}</small>
+        </div>
+      </div>`;
+  }
+}
+
+(async () => {
+  const teams = await loadTeams();
+  const picker = document.getElementById('team-picker');
+  if (teams.length === 0) {
+    picker.style.display = 'none';
+    document.getElementById('content').innerHTML = emptyState('Zatím žádné týmy v databázi.');
+    return;
+  }
+  // Naplnění dropdownu
+  picker.innerHTML = teams.map(t => `<option value="${escapeAttr(t)}">${escapeHTML(t)}</option>`).join('');
+  // URL parametr ?team=X má přednost
+  const fromUrl = new URLSearchParams(window.location.search).get('team');
+  const initial = fromUrl && teams.includes(fromUrl) ? fromUrl : teams[0];
+  picker.value = initial;
+  if (teams.length === 1) picker.style.display = 'none';
+  picker.addEventListener('change', () => {
+    loadAndRender(picker.value);
+    const u = new URL(window.location.href);
+    u.searchParams.set('team', picker.value);
+    history.replaceState(null, '', u.toString());
+  });
+  loadAndRender(initial);
+})();
+</script>
+</body>
+</html>

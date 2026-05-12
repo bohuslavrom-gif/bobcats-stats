@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bobcats — trenérská analytika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #DC1F26;
+  --red-soft: #FCEBEB;
+  --red-dark: #501313;
+  --black: #1A1A1A;
+  --bg: #F8F8F7;
+  --surface: #FFFFFF;
+  --surface-alt: #F1EFE8;
+  --text: #1A1A1A;
+  --text-muted: #5F5E5A;
+  --text-subtle: #888780;
+  --border: rgba(26, 26, 26, 0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+.hero {
+  background: var(--black);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.hero::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--red); }
+.hero .brand { display: flex; align-items: center; gap: 16px; }
+.hero .logo { width: 56px; height: 56px; flex-shrink: 0; }
+.hero .logo img { width: 100%; height: 100%; object-fit: contain; filter: invert(1); }
+.hero .wordmark { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 0.06em; line-height: 1; }
+.hero .wordmark .accent { color: var(--red); }
+.hero .meta-line { font-size: 11px; color: rgba(255, 255, 255, 0.65); margin-top: 4px; letter-spacing: 0.1em; text-transform: uppercase; }
+.hero .right { display: flex; align-items: center; gap: 12px; }
+.hero select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 30px 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='white' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.row { display: grid; gap: 12px; }
+.metrics { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 16px; }
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.metric.accent::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--red); }
+.metric .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.metric .val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px; font-weight: 400;
+  margin-top: 2px; font-variant-numeric: tabular-nums;
+  line-height: 1.05; letter-spacing: 0.02em;
+}
+.metric .sub { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+
+.grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 16px; }
+@media (min-width: 720px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-top: 16px;
+}
+.card-title { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 14px; }
+.card-title h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; font-weight: 400;
+  letter-spacing: 0.04em; margin: 0;
+}
+.card-title .meta { font-size: 11px; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.drv-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
+.drv-result {
+  background: var(--surface-alt);
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+.drv-result.td { background: var(--red-soft); }
+.drv-result.td .v { color: var(--red); }
+.drv-result .v {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; font-weight: 400;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.drv-result .l {
+  font-size: 10px;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.field {
+  position: relative;
+  height: 70px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  margin-top: 16px;
+  overflow: hidden;
+}
+.field .midline { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.15); }
+.field .endzone-l, .field .endzone-r { position: absolute; top: 0; bottom: 0; width: 10%; background: rgba(220, 31, 38, 0.12); }
+.field .endzone-l { left: 0; }
+.field .endzone-r { right: 0; }
+.field .dot {
+  position: absolute;
+  top: 50%; transform: translate(-50%, -50%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  opacity: 0.55;
+}
+.field-cap {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-subtle);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.bar-row .label { color: var(--text); }
+.bar-row .label .side {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.bar-row .label .side.off { background: var(--red-soft); color: var(--red-dark); }
+.bar-row .label .side.def { background: var(--surface-alt); color: var(--text-muted); }
+.bar-row .label .side.both { background: #E6F1FB; color: #042C53; }
+.bar-vis {
+  display: flex; align-items: center; gap: 8px;
+  width: 180px; max-width: 50vw;
+}
+.bar-wrap { flex: 1; height: 16px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+.bar { height: 100%; border-radius: 4px; background: var(--red); }
+.bar.def { background: var(--black); }
+.bar.both { background: #185FA5; }
+.bar-val {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  width: 30px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.lb table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.lb th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-subtle);
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.lb td { padding: 10px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.lb tr:last-child td { border-bottom: none; }
+.lb .num { text-align: right; font-variant-numeric: tabular-nums; }
+.lb .opp { font-weight: 500; }
+.lb .opp .date { color: var(--text-subtle); font-weight: 400; }
+.lb .badge {
+  font-size: 10px; padding: 2px 8px; border-radius: 4px;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.lb .badge.w { background: var(--red); color: #fff; }
+.lb .badge.l { background: var(--surface-alt); color: var(--text-muted); }
+.lb .badge.t { background: var(--surface-alt); color: var(--text-muted); }
+
+.empty, .loading { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; }
+.empty .ico, .loading .ico { font-size: 32px; opacity: 0.4; margin-bottom: 8px; display: block; }
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.chart-wrap { position: relative; width: 100%; height: 220px; }
+
+.legend-inline {
+  display: flex; gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.legend-inline .swatch {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: -1px;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 24px;
+  padding: 16px 0;
+  font-size: 11px;
+  color: var(--text-subtle);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 480px) {
+  .hero { padding: 18px 20px; flex-direction: column; align-items: flex-start; }
+  .hero .wordmark { font-size: 32px; }
+  .hero .logo { width: 48px; height: 48px; }
+  .metric .val { font-size: 26px; }
+  .card { padding: 14px 16px; }
+  .lb th, .lb td { padding: 6px 4px; font-size: 11px; }
+  .lb th:nth-child(5), .lb td:nth-child(5),
+  .lb th:nth-child(6), .lb td:nth-child(6) { display: none; }
+  .bar-vis { width: 120px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="brand">
+      <div class="logo"><img src="bobcats-logo.png" alt="Bobcats logo"></div>
+      <div>
+        <div class="wordmark"><span class="accent">BOB</span>CATS</div>
+        <div class="meta-line" id="hero-sub">Trenérská analytika · Sezóna 2026</div>
+      </div>
+    </div>
+    <div class="right">
+      <select id="team-picker" aria-label="Vyber tým"></select>
+    </div>
+  </header>
+
+  <div id="content">
+    <div class="loading">
+      <div class="spinner"></div>
+      Načítám data…
+    </div>
+  </div>
+
+  <footer class="footer">Bobcats stats · trenérská sekce</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxq-2I7KqIaE-S7mriXsJ-9s5OjCzFcmpVEMVVG4kGtuns5STvRDjAQi9HdRWyeOvkX/exec';
+
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    const sc = document.createElement('script');
+    const tm = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
+    function cleanup() { clearTimeout(tm); delete window[cbName]; if (sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    sc.onerror = () => { cleanup(); reject(new Error('Script error')); };
+    const qs = Object.entries({ ...params, callback: cbName })
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join('&');
+    sc.src = `${GAS_URL}?${qs}`;
+    document.head.appendChild(sc);
+  });
+}
+
+function escapeHTML(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+function escapeAttr(s) { return escapeHTML(s); }
+
+function emptyState(msg) {
+  return `<div class="card"><div class="empty"><span class="ico">📊</span>${escapeHTML(msg)}</div></div>`;
+}
+
+// ============================================================
+//  Render — coach analytics
+// ============================================================
+function renderCoach(data, team) {
+  if (!data || !data.team) return emptyState('Pro tento tým zatím nejsou žádná data.');
+
+  // Metriky nahoře
+  const metricsHTML = `
+    <div class="row metrics">
+      <div class="metric accent"><div class="lbl">Drive eff.</div><div class="val">${data.driveEfficiency}%</div><div class="sub">drives → TD</div></div>
+      <div class="metric"><div class="lbl">Avg drive</div><div class="val">${data.avgPlaysPerDrive}</div><div class="sub">plays / drive</div></div>
+      <div class="metric accent"><div class="lbl">Faulů</div><div class="val">${data.faulyTotal}</div><div class="sub">${data.faulyPerGame} / zápas</div></div>
+      <div class="metric"><div class="lbl">Fauly yardů</div><div class="val">${data.faulyYdsTotal}</div><div class="sub">${data.faulyYdsPerGame} / zápas</div></div>
+    </div>`;
+
+  // Drive výsledky
+  const dr = data.driveResults;
+  const driveTotal = data.driveCount;
+  const drvHTML = driveTotal === 0 ? '' : `
+    <div class="card">
+      <div class="card-title"><h3>Výsledky drive</h3><span class="meta">${driveTotal} drives</span></div>
+      <div class="drv-results">
+        <div class="drv-result td"><div class="v">${dr.td || 0}</div><div class="l">TD</div></div>
+        <div class="drv-result"><div class="v">${dr.downs || 0}</div><div class="l">Downs</div></div>
+        <div class="drv-result"><div class="v">${dr.int || 0}</div><div class="l">INT</div></div>
+        <div class="drv-result"><div class="v">${dr.safety || 0}</div><div class="l">Safety</div></div>
+        <div class="drv-result"><div class="v">${(dr.halftime || 0) + (dr.eog || 0) + (dr.turnover || 0) + (dr.other || 0)}</div><div class="l">Ostatní</div></div>
+      </div>
+      <div class="field" aria-hidden="true" id="field-viz">
+        <div class="endzone-l"></div>
+        <div class="endzone-r"></div>
+        <div class="midline"></div>
+        ${data.endPositions.map(b => `<div class="dot" style="left:${(b/50*100).toFixed(1)}%"></div>`).join('')}
+      </div>
+      <div class="field-cap"><span>Vlastní endzone</span><span>Středová čára</span><span>Soupeřova endzone</span></div>
+    </div>`;
+
+  // Fauly + yardy v sezóně
+  const faulMax = Math.max(1, ...data.faulyBreakdown.map(f => f.count));
+  const faulRows = data.faulyBreakdown.map(f => {
+    const sideClass = f.side === 'Útok' ? 'off' : f.side === 'Obrana' ? 'def' : 'both';
+    const sideLabel = f.side || '—';
+    return `
+      <div class="bar-row">
+        <span class="label">${escapeHTML(f.name)}<span class="side ${sideClass}">${escapeHTML(sideLabel)}</span></span>
+        <span class="bar-vis">
+          <span class="bar-wrap"><span class="bar ${sideClass}" style="width:${(f.count/faulMax*100).toFixed(0)}%"></span></span>
+          <span class="bar-val">${f.count}</span>
+        </span>
+      </div>`;
+  }).join('');
+
+  const grid2HTML = `
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><h3>Fauly podle typu</h3><span class="meta">strana faulu</span></div>
+        ${data.faulyBreakdown.length === 0 ? '<div class="empty">Žádné fauly v sezóně.</div>' : `
+          <div class="legend-inline">
+            <span><span class="swatch" style="background:var(--red)"></span>Útok</span>
+            <span><span class="swatch" style="background:var(--black)"></span>Obrana</span>
+            <span><span class="swatch" style="background:#185FA5"></span>Oba</span>
+          </div>
+          ${faulRows}`}
+      </div>
+      <div class="card">
+        <div class="card-title"><h3>Yardy v sezóně</h3><span class="meta">útočné yardy / zápas</span></div>
+        ${data.yardsTrend.length === 0 ? '<div class="empty">Žádné zápasy.</div>' :
+          `<div class="chart-wrap"><canvas id="ydsChart" role="img" aria-label="Spojnicový graf útočných yardů per zápas"></canvas></div>`}
+      </div>
+    </div>`;
+
+  // Match log
+  const matchRows = data.matchLog.slice().reverse().map(m => `
+    <tr>
+      <td class="opp">${escapeHTML(m.opponent)}<span class="date"> · ${escapeHTML(m.date)}</span></td>
+      <td class="num">${m.ourScore}–${m.oppScore}</td>
+      <td class="num">${m.offDrives}</td>
+      <td class="num">${m.tdPct}%</td>
+      <td class="num">${m.passYds}</td>
+      <td class="num">${m.rushYds}</td>
+      <td class="num">${m.penCount} (${m.penYds}y)</td>
+      <td><span class="badge ${m.result === 'W' ? 'w' : m.result === 'L' ? 'l' : 't'}">${m.result}</span></td>
+    </tr>
+  `).join('');
+
+  const logHTML = data.matchLog.length === 0 ? '' : `
+    <div class="card lb">
+      <div class="card-title"><h3>Match log</h3><span class="meta">${data.matchCount} zápasů</span></div>
+      <table>
+        <thead><tr><th>Zápas</th><th class="num">Skóre</th><th class="num">Drives</th><th class="num">TD %</th><th class="num">Pass Y</th><th class="num">Rush Y</th><th class="num">Fauly</th><th></th></tr></thead>
+        <tbody>${matchRows}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('content').innerHTML = metricsHTML + drvHTML + grid2HTML + logHTML;
+
+  // Yards chart
+  if (data.yardsTrend.length > 0) {
+    new Chart(document.getElementById('ydsChart'), {
+      type: 'line',
+      data: {
+        labels: data.yardsTrend.map(t => t.opponent),
+        datasets: [{
+          label: 'OFF',
+          data: data.yardsTrend.map(t => t.off),
+          borderColor: '#DC1F26',
+          backgroundColor: 'rgba(220, 31, 38, 0.1)',
+          tension: 0.3, borderWidth: 2,
+          pointRadius: 4, pointBackgroundColor: '#DC1F26',
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { displayColors: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+          y: { beginAtZero: true, ticks: { stepSize: 50, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  }
+
+  document.getElementById('hero-sub').textContent = `Trenérská analytika · ${team}`;
+}
+
+// ============================================================
+//  Init
+// ============================================================
+async function loadTeams() {
+  try {
+    const res = await jsonp({ action: 'getTeams' });
+    return (res && res.teams) || [];
+  } catch (e) {
+    console.error('getTeams failed:', e);
+    return [];
+  }
+}
+
+async function loadAndRender(team) {
+  document.getElementById('content').innerHTML = `<div class="loading"><div class="spinner"></div>Načítám data…</div>`;
+  try {
+    const data = await jsonp({ action: 'coachStats', team });
+    renderCoach(data, team);
+  } catch (e) {
+    console.error('coachStats failed:', e);
+    document.getElementById('content').innerHTML = `
+      <div class="card"><div class="empty"><span class="ico">⚠</span>
+        Nepodařilo se načíst data.<br>
+        <small style="color:var(--text-subtle)">${escapeHTML(e.message)}</small>
+      </div></div>`;
+  }
+}
+
+(async () => {
+  const teams = await loadTeams();
+  const picker = document.getElementById('team-picker');
+  if (teams.length === 0) {
+    picker.style.display = 'none';
+    document.getElementById('content').innerHTML = emptyState('Zatím žádné týmy v databázi.');
+    return;
+  }
+  picker.innerHTML = teams.map(t => `<option value="${escapeAttr(t)}">${escapeHTML(t)}</option>`).join('');
+  const fromUrl = new URLSearchParams(window.location.search).get('team');
+  const initial = fromUrl && teams.includes(fromUrl) ? fromUrl : teams[0];
+  picker.value = initial;
+  if (teams.length === 1) picker.style.display = 'none';
+  picker.addEventListener('change', () => {
+    loadAndRender(picker.value);
+    const u = new URL(window.location.href);
+    u.searchParams.set('team', picker.value);
+    history.replaceState(null, '', u.toString());
+  });
+  loadAndRender(initial);
+})();
+</script>
+</body>
+</html>
