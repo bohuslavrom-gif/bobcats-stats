@@ -2448,3 +2448,528 @@ function switchProfile(name) {
   data.active = name;
   writeProfilesData(data);
   // Upda
+  // Update UI elements
+  document.getElementById('ptab-a').textContent = state.teams.A.name;
+  const ti = document.getElementById('team-name-input');
+  if (ti && playerTab === 'A') ti.value = state.teams.A.name;
+  // Sync Sheets settings teamName na nový profil
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}');
+    s.teamName = name;
+    localStorage.setItem(LS_SETTINGS, JSON.stringify(s));
+  } catch(e) {}
+  renderPlayerList();
+  renderProfileSelector();
+  showToast('Tým: ' + name);
+}
+
+function createProfile() {
+  const name = (prompt('Název nového týmu (např. Bobcats Muži):') || '').trim();
+  if (!name) return;
+  const data = getProfilesData() || { profiles: {}, active: name };
+  if (data.profiles[name]) { alert('Tým "' + name + '" už existuje.'); return; }
+  if (data.active && data.profiles[data.active]) {
+    data.profiles[data.active] = snapshotActiveProfile();
+  }
+  data.profiles[name] = { name, players: [], playbook: [] };
+  data.active = name;
+  writeProfilesData(data);
+  applyProfileToState(data.profiles[name]);
+  document.getElementById('ptab-a').textContent = name;
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}');
+    s.teamName = name;
+    localStorage.setItem(LS_SETTINGS, JSON.stringify(s));
+  } catch(e) {}
+  renderPlayerList();
+  renderProfileSelector();
+  showToast('Vytvořen tým: ' + name);
+}
+
+function deleteProfile() {
+  const data = getProfilesData();
+  if (!data) return;
+  const name = data.active;
+  if (!confirm('Smazat profil "' + name + '"? Soupiska a playbook tohoto týmu se ztratí.')) return;
+  delete data.profiles[name];
+  const remaining = Object.keys(data.profiles);
+  if (remaining.length === 0) {
+    const def = { name: 'Tým', players: [], playbook: [] };
+    data.profiles[def.name] = def;
+    data.active = def.name;
+  } else {
+    data.active = remaining[0];
+  }
+  applyProfileToState(data.profiles[data.active]);
+  writeProfilesData(data);
+  document.getElementById('ptab-a').textContent = state.teams.A.name;
+  renderPlayerList();
+  renderProfileSelector();
+  showToast('Smazáno');
+}
+
+function renderProfileSelector() {
+  const sel = document.getElementById('profile-select');
+  if (!sel) return;
+  const data = getProfilesData();
+  if (!data) { sel.innerHTML = ''; return; }
+  sel.innerHTML = Object.keys(data.profiles)
+    .sort((a, b) => a.localeCompare(b))
+    .map(n => '<option value="' + n.replace(/"/g, '&quot;') + '"' + (n === data.active ? ' selected' : '') + '>' + n + '</option>')
+    .join('');
+}
+
+// ── Save/Load wrappers (zachová legacy callsites) ────────────────────────
+function savePlayersToStorage() {
+  persistActiveProfile();
+  persistOpponent();
+  // Legacy keys pro zpětnou kompat
+  localStorage.setItem(LS_PLAYERS, JSON.stringify({
+    A: { name: state.teams.A.name, players: state.teams.A.players },
+    B: { name: state.teams.B.name, players: state.teams.B.players }
+  }));
+  localStorage.setItem(LS_PLAYBOOK, JSON.stringify(state.playbook));
+}
+
+function loadPlayersFromStorage() {
+  try {
+    let data = getProfilesData();
+    // Migrace z legacy struktury, pokud neexistuje žádný profil
+    if (!data) {
+      const legacyP  = JSON.parse(localStorage.getItem(LS_PLAYERS) || 'null');
+      const legacyPB = JSON.parse(localStorage.getItem(LS_PLAYBOOK) || 'null');
+      if (legacyP && legacyP.A) {
+        const name = legacyP.A.name || 'Tým';
+        data = {
+          profiles: { [name]: { name, players: legacyP.A.players || [], playbook: legacyPB || [] } },
+          active: name
+        };
+        writeProfilesData(data);
+      } else {
+        const def = { name: 'Tým', players: [], playbook: [] };
+        data = { profiles: { [def.name]: def }, active: def.name };
+        writeProfilesData(data);
+      }
+    }
+    const active = data.profiles[data.active];
+    if (active) applyProfileToState(active);
+    // Soupeř
+    let opp = null;
+    try { opp = JSON.parse(localStorage.getItem(LS_OPPONENT)); } catch(e) {}
+    if (!opp) {
+      try {
+        const legacyP = JSON.parse(localStorage.getItem(LS_PLAYERS));
+        if (legacyP && legacyP.B) opp = { name: legacyP.B.name, players: legacyP.B.players };
+      } catch(e) {}
+    }
+    if (opp) {
+      state.teams.B.name    = opp.name || 'TÝM B';
+      state.teams.B.players = opp.players || [];
+    }
+  } catch(e) {
+    console.warn('loadPlayersFromStorage:', e);
+  }
+}
+
+function loadSettingsFromStorage() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS));
+    if (s && s.scriptUrl) {
+      const el = document.getElementById('script-url-input');
+      if (el) el.value = s.scriptUrl;
+    }
+    if (s && s.teamName)  {
+      const el = document.getElementById('team-name-sheets');
+      if (el) el.value = s.teamName;
+    }
+  } catch(e) {}
+}
+
+function saveSettings() {
+  const url  = document.getElementById('script-url-input').value.trim();
+  const team = document.getElementById('team-name-sheets').value.trim();
+  localStorage.setItem(LS_SETTINGS, JSON.stringify({ scriptUrl: url, teamName: team }));
+  showToast('Nastavení uloženo ✓');
+}
+
+// ── Player / Playbook handlers ───────────────────────────────────────────
+function addPlayer() {
+  const pos  = document.getElementById('new-pos').value;
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) return;
+  state.teams[playerTab].players.push({ pos, name });
+  document.getElementById('new-name').value = '';
+  renderPlayerList();
+  savePlayersToStorage();
+}
+function removePlayer(i) {
+  state.teams[playerTab].players.splice(i, 1);
+  renderPlayerList();
+  savePlayersToStorage();
+}
+function updateTeamName(val) {
+  state.teams[playerTab].name = val || ('TÝM ' + playerTab);
+  document.getElementById('ptab-' + playerTab.toLowerCase()).textContent = state.teams[playerTab].name;
+  savePlayersToStorage();
+}
+function addPlaybookPlay() {
+  const inp  = document.getElementById('new-play-name');
+  const name = inp.value.trim();
+  if (!name || state.playbook.includes(name)) return;
+  state.playbook.push(name);
+  inp.value = '';
+  renderPlaybookList();
+  savePlayersToStorage();
+}
+function removePlaybookPlay(i) {
+  state.playbook.splice(i, 1);
+  renderPlaybookList();
+  savePlayersToStorage();
+}
+
+// ═══════════════ POLOČAS ═══════════════
+let currentHalf = 1;
+
+function startSecondHalf() {
+  if (!confirm('Přepnout na 2. poločas? Timeouty se resetují.')) return;
+  currentHalf = 2;
+  state.teams.A.timeouts = [true, true];
+  state.teams.B.timeouts = [true, true];
+  updateTimeoutDots();
+  showToast('2. poločas zahájen — timeouty resetovány');
+  closeStats();
+}
+
+// ═══════════════ NOVÝ ZÁPAS ═══════════════
+function newMatch() {
+  if (!confirm('Uložit zápas do Google Sheets a začít nový?')) return;
+
+  // 1) Sestavit payload PŘED resetem
+  const payload = buildMatchPayload();
+
+  // 2) Reset state
+  state.possession = 'A';
+  state.ball = 5; state.down = 1; state.firstDownAt = 25;
+  state.teams.A.score = 0; state.teams.B.score = 0;
+  state.teams.A.timeouts = [true, true]; state.teams.B.timeouts = [true, true];
+  state.playLog = []; state.drives = [];
+  state.currentDrive = { team: 'A', plays: 0, startBall: 5 };
+  state.awaitingExtraPoint = false; state.tdScoringTeam = null;
+  currentHalf = 1;
+  resetPlay(); renderLog(); updateFieldDisplay();
+  closeStats();
+
+  showToast('Nový zápas zahájen — ukládám do Sheets...');
+  saveMatchToSheets(() => {}, payload);
+}
+
+function newMatchWithoutSave() {
+  if (!confirm('Začít nový zápas BEZ uložení?')) return;
+  state.possession = 'A';
+  state.ball = 5; state.down = 1; state.firstDownAt = 25;
+  state.teams.A.score = 0; state.teams.B.score = 0;
+  state.teams.A.timeouts = [true, true]; state.teams.B.timeouts = [true, true];
+  state.playLog = []; state.drives = [];
+  state.currentDrive = { team: 'A', plays: 0, startBall: 5 };
+  state.awaitingExtraPoint = false; state.tdScoringTeam = null;
+  currentHalf = 1;
+  resetPlay(); renderLog(); updateFieldDisplay();
+  closeStats();
+  showToast('Nový zápas zahájen');
+}
+
+// ═══════════════ GOOGLE SHEETS ═══════════════
+function getScriptUrl() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS));
+    return s && s.scriptUrl ? s.scriptUrl : null;
+  } catch(e) { return null; }
+}
+function getSheetsTeamName() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS));
+    return (s && s.teamName) ? s.teamName : state.teams.A.name;
+  } catch(e) { return state.teams.A.name; }
+}
+
+function buildMatchPayload() {
+  const teamName = getSheetsTeamName();
+  const plays = state.playLog;
+
+  // Yardy
+  let passYds = 0, rushYds = 0;
+  plays.forEach(p => {
+    if (['pass','pass_td'].includes(p.badge)) { const m = p.desc && p.desc.match(/\+(\d+) yd/); if(m) passYds += parseInt(m[1]); }
+    if (['run','run_td'].includes(p.badge))   { const m = p.desc && p.desc.match(/([+-]?\d+) yd/); if(m) rushYds += parseInt(m[1]); }
+  });
+
+  // Drives — agregace + breakdown
+  const offDrives = state.drives.filter(d => d.team === 'A');
+  const defDrives = state.drives.filter(d => d.team !== 'A');
+  const offTD    = offDrives.filter(d => d.result === 'td').length;
+  const defStops = defDrives.filter(d => d.result !== 'td').length;
+  const xp1att   = offDrives.filter(d => d.xpAttempted === 1).length;
+  const xp1ok    = offDrives.filter(d => d.xpAttempted === 1 && d.xpScored === 1).length;
+  const xp2att   = offDrives.filter(d => d.xpAttempted === 2).length;
+  const xp2ok    = offDrives.filter(d => d.xpAttempted === 2 && d.xpScored === 2).length;
+
+  // Fauly — agregát + per-faul breakdown
+  const pens = plays.filter(p => p.badge === 'penalty');
+  let penYds = 0;
+  pens.forEach(p => {
+    if (p.pen && typeof p.pen.yards === 'number') {
+      penYds += Math.abs(p.pen.yards);
+    } else {
+      const m = p.desc && p.desc.match(/([+-]?\d+) yd/);
+      if (m) penYds += Math.abs(parseInt(m[1]));
+    }
+  });
+  const penalties = pens
+    .filter(p => p.pen)
+    .map(p => ({
+      side:    p.pen.side,
+      faulCz:  p.pen.faulCz,
+      faulId:  p.pen.faulId,
+      player:  p.pen.player,
+      yards:   p.pen.yards,
+      lod:     !!p.pen.lod,
+      afd:     !!p.pen.afd,
+      deadBall: !!p.pen.deadBall,
+    }));
+
+  // Drives breakdown pro list "[Tým] - Drives"
+  const drivesPayload = (state.drives || []).map((dr, i) => ({
+    idx:       i + 1,
+    team:      dr.team,
+    result:    dr.result || '',
+    plays:     dr.plays || 0,
+    startBall: typeof dr.startBall === 'number' ? dr.startBall : null,
+    endBall:   typeof dr.endBall   === 'number' ? dr.endBall   : null,
+    xpScored:  dr.xpScored  || 0,
+    xpAttempted: dr.xpAttempted || 0,
+  }));
+
+  // QB stats
+  const qbMap = {};
+  plays.forEach(p => {
+    if (!['pass','pass_td'].includes(p.badge)) return;
+    const qb = p.qb || (p.desc && p.desc.match(/^(.+?) →/)?.[1]);
+    if (!qb) return;
+    if (!qbMap[qb]) qbMap[qb] = {att:0,comp:0,yds:0,td:0,int:0,sack:0};
+    qbMap[qb].att++;
+    if (p.desc && p.desc.includes('+') && p.desc.includes('→')) {
+      qbMap[qb].comp++;
+      const m = p.desc.match(/\+(\d+) yd/); if(m) qbMap[qb].yds += parseInt(m[1]);
+    }
+    if (p.isTD) qbMap[qb].td++;
+    if (p.desc && p.desc.includes('INT')) qbMap[qb].int++;
+  });
+  plays.forEach(p => {
+    if (p.badge !== 'sack') return;
+    const m = p.desc && p.desc.match(/^(.+?) sack/);
+    if (!m) return;
+    if (!qbMap[m[1]]) qbMap[m[1]] = {att:0,comp:0,yds:0,td:0,int:0,sack:0};
+    qbMap[m[1]].sack++;
+  });
+
+  // WR stats
+  const wrMap = {};
+  plays.forEach(p => {
+    if (!['pass','pass_td'].includes(p.badge)) return;
+    const wr = p.wr || (p.desc && p.desc.match(/→ (.+?)(?:\s+\+|\s+nekompletní)/)?.[1]);
+    if (!wr) return;
+    if (!wrMap[wr]) wrMap[wr] = {targets:0,rec:0,yds:0,td:0,xp:0,pts:0};
+    wrMap[wr].targets++;
+    if (p.desc && p.desc.includes('+') && !p.desc.includes('nekompletní')) {
+      wrMap[wr].rec++;
+      const m = p.desc.match(/\+(\d+) yd/); if(m) wrMap[wr].yds += parseInt(m[1]);
+    }
+    if (p.isTD) { wrMap[wr].td++; wrMap[wr].pts += 6; }
+  });
+  plays.forEach(p => {
+    if (!['xp1','xp2'].includes(p.badge)) return;
+    const m = p.desc && p.desc.match(/→ (.+?)(?:\s·|\s✓|\s✗|$)/);
+    if (!m) return;
+    const wr = m[1].trim();
+    if (!wrMap[wr]) wrMap[wr] = {targets:0,rec:0,yds:0,td:0,xp:0,pts:0};
+    wrMap[wr].xp++;
+    wrMap[wr].pts += p.badge === 'xp1' ? 1 : 2;
+  });
+
+  // DB stats
+  const dbMap = {};
+  const teamANames = state.teams.A.players.map(p => p.name);
+  plays.forEach(p => {
+    if (!['run','run_td','pass','pass_td'].includes(p.badge)) return;
+    const defM = p.desc && p.desc.match(/· ([^·\[\n]+?)(?:\s*\[|$)/);
+    if (!defM) return;
+    const def = defM[1].trim();
+    if (!teamANames.includes(def)) return;
+    if (!dbMap[def]) dbMap[def] = {flagPull:0,sack:0,brkup:0,int:0};
+    if (p.desc.includes('Flag Pull')) dbMap[def].flagPull++;
+    if (p.desc.includes('Sražený balón')) dbMap[def].brkup++;
+  });
+  plays.forEach(p => {
+    if (p.badge !== 'sack') return;
+    const m = p.desc && p.desc.match(/· (.+?)(?:\s*\[|$)/);
+    if (!m) return;
+    const def = m[1].trim();
+    if (!teamANames.includes(def)) return;
+    if (!dbMap[def]) dbMap[def] = {flagPull:0,sack:0,brkup:0,int:0};
+    dbMap[def].sack++;
+  });
+  plays.forEach(p => {
+    if (!p.desc || !p.desc.includes('INT')) return;
+    const m = p.desc.match(/zachytil (.+?)\s*\(/);
+    if (!m) return;
+    const def = m[1].trim();
+    if (!teamANames.includes(def)) return;
+    if (!dbMap[def]) dbMap[def] = {flagPull:0,sack:0,brkup:0,int:0};
+    dbMap[def].int++;
+  });
+
+  return {
+    team:     teamName,
+    opponent: state.teams.B.name,
+    date:     new Date().toLocaleDateString('cs-CZ'),
+    ourScore: state.teams.A.score,
+    oppScore: state.teams.B.score,
+    passYds, rushYds,
+    offDrives: offDrives.length, offTD,
+    defDrives: defDrives.length, defStops,
+    xp1att, xp1ok, xp2att, xp2ok,
+    penCount: pens.length, penYds,
+    qbMap, wrMap, dbMap,
+    teamAPlayers: teamANames,
+    penalties,                      // breakdown pro list "[Tým] - Fauly"
+    drives: drivesPayload,          // breakdown pro list "[Tým] - Drives"
+    roster: state.teams.A.players.map(p => ({   // pro list "[Tým] - Roster"
+      name: p.name || '',
+      pos:  p.pos  || '',
+      jersey: p.jersey || p.number || '',
+      photoUrl: p.photoUrl || ''
+    })),
+    // ── Per-play data pro list "[Tým] - Plays" (Phase 2) ──
+    plays: (state.playLog || []).map((p, idx) => {
+      const wasOurOffense = p.teamName === state.teams.A.name;
+      return {
+        idx,
+        teamName: p.teamName || '',
+        side:     wasOurOffense ? 'OFF' : 'DEF',
+        badge:    p.badge || '',
+        down:     p.snap ? p.snap.down : null,
+        ball:     p.snap ? p.snap.ball : null,
+        yds:      typeof p.yds === 'number' ? p.yds : null,
+        playName: p.playName || '',
+        isTD:     !!p.isTD,
+        isInt:    !!p.isInt,
+        desc:     p.desc || ''
+      };
+    }),
+  };
+}
+
+function saveMatchToSheets(onDone, prebuiltPayload) {
+  const url = getScriptUrl();
+  if (!url) {
+    showToast('⚠ Nastav Apps Script URL v nastavení', 'red');
+    if (onDone) onDone();
+    return;
+  }
+
+  // Pokud volající (newMatch) sestavil payload před resetem, použij ho.
+  const payload = prebuiltPayload || buildMatchPayload();
+  const body = JSON.stringify(payload);
+
+  // POST místo JSONP — JSONP měl ~12 KB limit URL parametrů.
+  // Content-Type 'text/plain' = "simple request" → bez CORS preflightu.
+  fetch(url, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body
+  })
+    .then(res => res.text())
+    .then(txt => {
+      let resp = null;
+      try { resp = JSON.parse(txt); } catch(_) {}
+      if (resp && resp.status === 'ok') {
+        showToast('Zápas uložen do Sheets ✓');
+      } else if (resp && resp.status === 'error') {
+        console.error('Sheets server error:', resp.message);
+        showToast('Chyba Sheets: ' + resp.message, 'red');
+      } else {
+        showToast('Odesláno do Sheets (zkontroluj listy)');
+      }
+      if (onDone) onDone();
+    })
+    .catch(err => {
+      // Fallback no-cors fire-and-forget
+      console.warn('Sheets fetch fail, trying no-cors:', err);
+      fetch(url, { method: 'POST', mode: 'no-cors',
+                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body })
+        .then(() => {
+          showToast('Odesláno do Sheets (zkontroluj listy)');
+          if (onDone) onDone();
+        })
+        .catch(err2 => {
+          console.error('Sheets chyba:', err2);
+          showToast('Chyba Sheets: ' + err2.message, 'red');
+          if (onDone) onDone();
+        });
+    });
+}
+
+// ═══════════════ TOAST ═══════════════
+function showToast(msg, color) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+      'padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;' +
+      'color:#fff;z-index:999;transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.background = color === 'red' ? '#ff3b30' : '#1c1c1e';
+  t.style.opacity = '1';
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.style.opacity = '0', 2500);
+}
+
+// ═══════════════ STATS PAGE — akce ═══════════════
+function renderStatsActions() {
+  return `
+    <div class="stat-card" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="stat-card-title">Správa zápasu</div>
+      <button onclick="startSecondHalf()" style="padding:13px;border:1.5px solid var(--border);background:var(--surface2);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:var(--blue);">
+        🕐 Přepnout na 2. poločas
+      </button>
+      <button onclick="newMatch()" style="padding:13px;border:none;background:var(--green);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:#fff;">
+        💾 Uložit & nový zápas
+      </button>
+      <button onclick="newMatchWithoutSave()" style="padding:13px;border:1.5px solid var(--border);background:var(--surface2);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:var(--red);">
+        🗑 Nový zápas bez uložení
+      </button>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-title">Nastavení Google Sheets</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:8px">Apps Script URL</div>
+      <input id="script-url-input" placeholder="https://script.google.com/macros/s/..."
+        style="width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter',sans-serif;font-size:0.78rem;margin-bottom:8px;background:var(--surface2);color:var(--text)" />
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:8px">Název týmu v Sheets</div>
+      <input id="team-name-sheets" placeholder="Bobcats Ženy"
+        style="width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter',sans-serif;font-size:0.85rem;margin-bottom:10px;background:var(--surface2);color:var(--text);font-weight:600" />
+      <button onclick="saveSettings()" style="width:100%;padding:11px;border:none;background:var(--blue);border-radius:8px;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;color:#fff;">
+        Uložit nastavení
+      </button>
+    </div>`;
+}
+
+// ═══════════════ INIT ═══════════════
+loadPlayersFromStorage();
+updateFieldDisplay();
+</script>
+</body>
+</html>
