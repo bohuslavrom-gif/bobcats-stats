@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bobcats Stats">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#DC1F26">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="bobcats-logo.png">
+<link rel="icon" type="image/png" href="bobcats-logo.png">
+<title>Bobcats Stats</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #f2f2f7;
+    --surface: #ffffff;
+    --surface2: #f8f8fb;
+    --border: #e5e5ea;
+    --border2: #d1d1d6;
+    --text: #1c1c1e;
+    --text2: #48484a;
+    --text3: #8e8e93;
+    --green: #34c759;
+    --green-bg: #e8f8ed;
+    --green-dark: #1a7a32;
+    --blue: #007aff;
+    --blue-bg: #e5f1ff;
+    --red: #ff3b30;
+    --red-bg: #fff0ef;
+    --orange: #ff9500;
+    --orange-bg: #fff5e5;
+    --purple: #af52de;
+    --purple-bg: #f5eaff;
+    --gold: #b8860b;
+    --gold-bg: #fdf6e3;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 2px 8px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .score-board {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+  }
+  .team-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 64px;
+  }
+  .team-score .name {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .team-score .pts {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .score-sep { font-size: 0.9rem; color: var(--text3); padding: 0 3px; margin-top: 12px; }
+  .team-score.clickable {
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 4px 10px;
+    transition: background 0.15s;
+    border: 1.5px solid transparent;
+  }
+  .team-score.clickable:hover { background: var(--surface2); }
+  .team-score.clickable.active { background: var(--green-bg); border-color: rgba(52,199,89,0.3); }
+  .ball-indicator { font-size: 0.65rem; }
+
+  /* TIMEOUTS */
+  .timeout-dots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+  }
+  .timeout-dots .to-label {
+    font-size: 0.55rem;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .to-dots { display: flex; gap: 5px; }
+  .to-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--orange);
+    border: none; cursor: pointer;
+    padding: 0;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(255,149,0,0.4);
+  }
+  .to-dot:hover { transform: scale(1.2); }
+  .to-dot.used {
+    background: var(--border);
+    box-shadow: none;
+  }
+
+  .top-actions { display: flex; gap: 6px; }
+  .top-btn {
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+  }
+  .top-btn:hover { background: var(--border); }
+
+  /* OFFENSE BAR */
+  .offense-bar {
+    background: var(--green-bg);
+    border-bottom: 1px solid rgba(52,199,89,0.2);
+    padding: 5px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+  .offense-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+  /* STATUS CARD */
+  .status-card {
+    background: var(--surface);
+    margin: 10px 12px 0;
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .status-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 9px 6px;
+    border-right: 1px solid var(--border);
+  }
+  .status-item:last-child { border-right: none; }
+  .status-item .label {
+    font-size: 0.58rem;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 2px;
+  }
+  .status-item .value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .status-item .value.green { color: var(--green-dark); }
+  .status-item .value.blue { color: var(--blue); }
+
+  /* FIELD BAR */
+  .field-wrap { padding: 10px 14px 12px; }
+  .field-bar {
+    position: relative;
+    height: 44px;
+    background: #e4f0e4;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .field-ez-l {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 9%;
+    background: rgba(255,59,48,0.1);
+    border-right: 1.5px dashed rgba(255,59,48,0.25);
+  }
+  .field-ez-r {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 9%;
+    background: rgba(52,199,89,0.12);
+    border-left: 1.5px dashed rgba(52,199,89,0.35);
+  }
+  .field-mid {
+    position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 1.5px; background: rgba(0,0,0,0.1);
+    transform: translateX(-50%);
+  }
+  .field-first-down {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: var(--blue); opacity: 0.65;
+    transition: left 0.4s ease; z-index: 1;
+  }
+  .field-ball {
+    position: absolute; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    background: var(--orange);
+    border-radius: 50%;
+    border: 2.5px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    transition: left 0.4s ease; z-index: 2;
+  }
+  #field-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 0.75rem; color: var(--green-dark); font-weight: 800;
+    transition: left 0.4s; pointer-events: none; z-index: 3;
+  }
+  .field-label {
+    font-size: 0.56rem; color: var(--text3);
+    text-align: center; margin-top: 4px; font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    min-height: calc(100vh - 140px);
+  }
+
+  /* PLAY PANEL */
+  .play-panel { padding: 10px 12px 20px; }
+
+  .section-label {
+    font-size: 0.68rem; font-weight: 600;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.08em; margin: 10px 2px 6px;
+  }
+
+  /* Team selector */
+  .team-selector { display: flex; gap: 8px; }
+  .team-btn {
+    flex: 1; padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem; font-weight: 600;
+    border-radius: 10px; cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .team-btn.active {
+    border-color: var(--green);
+    background: var(--green-bg);
+    color: var(--green-dark);
+  }
+
+  /* Play cards */
+  .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .play-btn {
+    padding: 13px 14px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem; font-weight: 600;
+    border-radius: 12px; cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow-sm); text-align: left;
+  }
+  .play-btn .icon {
+    font-size: 1.2rem; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; background: var(--surface2); flex-shrink: 0;
+  }
+  .play-btn:active { transform: scale(0.97); }
+  .play-btn.run .icon { background: #e5f1ff; }
+  .play-btn.run.selected, .play-btn.run:hover { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
+  .play-btn.pass .icon { background: var(--green-bg); }
+  .play-btn.pass.selected, .play-btn.pass:hover { border-color: var(--green); background: var(--green-bg); color: var(--green-dark); }
+  .play-btn.sack .icon { background: var(--red-bg); }
+  .play-btn.sack.selected, .play-btn.sack:hover { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .play-btn.penalty .icon { background: var(--orange-bg); }
+  .play-btn.penalty.selected, .play-btn.penalty:hover { border-color: var(--orange); background: var(--orange-bg); color: var(--orange); }
+  .play-btn.safety .icon { background: var(--purple-bg); }
+  .play-btn.safety.selected, .play-btn.safety:hover { border-color: var(--purple); background: var(--purple-bg); color: var(--purple); }
+  .play-btn.td .icon { background: var(--gold-bg); }
+  .play-btn.td.selected, .play-btn.td:hover { border-color: var(--gold); background: var(--gold-bg); color: var(--gold); }
+
+  /* Step panels */
+  .step-panel {
+    background: var(--surface); border-radius: 12px;
+    padding: 13px; margin-bottom: 8px;
+    box-shadow: var(--shadow-sm);
+    animation: slideUp 0.17s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .step-label {
+    font-size: 0.65rem; font-weight: 600;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 9px;
+  }
+  .choice-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .choice-btn {
+    padding: 7px 13px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.83rem; font-weight: 600;
+    border-radius: 20px; cursor: pointer; transition: all 0.12s;
+  }
+  .choice-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+  .choice-btn.selected { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+  .choice-btn.neg { color: var(--red); border-color: rgba(255,59,48,0.3); }
+  .choice-btn.neg:hover, .choice-btn.neg.selected { border-color: var(--red); background: var(--red-bg); }
+
+  /* Yard input */
+  .yard-input-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .yard-input {
+    width: 70px; padding: 7px 10px;
+    background: var(--surface2); border: 1.5px solid var(--border2);
+    border-radius: 8px; color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem; font-weight: 700; text-align: center;
+  }
+  .yard-input:focus { outline: none; border-color: var(--blue); }
+  .yard-quick { display: flex; gap: 5px; flex-wrap: wrap; }
+  .yard-quick-btn {
+    padding: 5px 8px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: 'Inter', sans-serif;
+    font-size: 0.75rem; font-weight: 600; border-radius: 6px; cursor: pointer;
+  }
+  .yard-quick-btn:hover { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+
+  /* Confirm */
+  .confirm-btn {
+    width: 100%; padding: 14px;
+    background: var(--green); color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    border: none; border-radius: 12px; cursor: pointer;
+    transition: all 0.15s; margin-top: 4px;
+  }
+  .confirm-btn:hover { background: #2db350; }
+  .confirm-btn:active { transform: scale(0.98); }
+
+  /* WIZARD STEPPER */
+  .wizard-wrap {
+    background: var(--surface);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .wizard-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    min-height: 40px;
+  }
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--text3);
+    font-weight: 500;
+  }
+  .breadcrumb-item .bc-val {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    color: var(--text2);
+    font-weight: 600;
+    font-size: 0.78rem;
+  }
+  .breadcrumb-sep { color: var(--border2); font-size: 0.8rem; }
+  .wizard-step {
+    padding: 14px;
+    animation: stepIn 0.18s ease;
+  }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 10px 12px;
+    overflow-y: auto;
+    max-height: calc(100vh - 140px);
+  }
+  .play-log { display: flex; flex-direction: column; gap: 6px; }
+  .play-log-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 11px;
+    font-size: 0.81rem; animation: slideUp 0.17s ease;
+  }
+  .play-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+  .play-type-badge {
+    font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 20px;
+    background: var(--green-bg); color: var(--green-dark);
+  }
+  .play-type-badge.run { background: var(--blue-bg); color: var(--blue); }
+  .play-type-badge.run_td { background: var(--gold-bg); color: var(--gold); }
+  .play-type-badge.pass_td { background: var(--gold-bg); color: var(--gold); }
+  .play-type-badge.sack { background: var(--red-bg); color: var(--red); }
+  .play-type-badge.penalty { background: var(--orange-bg); color: var(--orange); }
+  .play-type-badge.safety { background: var(--purple-bg); color: var(--purple); }
+  .play-type-badge.td, .play-type-badge.inttd { background: var(--gold-bg); color: var(--gold); }
+  .play-type-badge.xp1 { background: var(--green-bg); color: var(--green-dark); }
+  .play-type-badge.xp2 { background: var(--blue-bg); color: var(--blue); }
+  .play-type-badge.xp0 { background: var(--red-bg); color: var(--red); }
+  .down-info { font-size: 0.62rem; color: var(--text3); font-weight: 500; }
+  .play-desc { color: var(--text); font-weight: 500; line-height: 1.35; }
+
+  .undo-btn {
+    width: 100%; padding: 8px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text3); font-family: 'Inter', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+    border-radius: 8px; cursor: pointer; margin-bottom: 10px;
+    transition: all 0.12s;
+  }
+  .undo-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+  .empty-log { color: var(--text3); font-size: 0.82rem; text-align: center; padding: 20px 0; }
+
+  /* MODALS — bottom sheet style */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: flex-end;
+    z-index: 100;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 8px 20px 32px;
+    width: 100%; max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 -4px 32px rgba(0,0,0,0.1);
+    animation: sheetUp 0.22s ease;
+  }
+  @keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 36px; height: 4px; background: var(--border2);
+    border-radius: 2px; margin: 8px auto 14px;
+  }
+  .modal h2 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .profile-bar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; padding: 10px;
+    background: var(--surface2); border-radius: 10px;
+  }
+  .modal-team-tabs {
+    display: flex; gap: 4px; margin-bottom: 14px;
+    background: var(--surface2); border-radius: 10px; padding: 3px;
+  }
+  .modal-tab {
+    flex: 1; padding: 7px; border: none; background: transparent;
+    color: var(--text3); font-family: 'Inter', sans-serif;
+    font-size: 0.83rem; font-weight: 600; border-radius: 8px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .modal-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  .player-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .player-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 12px;
+  }
+  .pos-badge {
+    font-size: 0.68rem; font-weight: 700; padding: 3px 7px;
+    border-radius: 6px; background: var(--green-bg); color: var(--green-dark);
+    min-width: 32px; text-align: center;
+  }
+  .pos-badge.qb { background: var(--blue-bg); color: var(--blue); }
+  .pos-badge.db { background: var(--purple-bg); color: var(--purple); }
+  .pname { flex: 1; color: var(--text); font-size: 0.88rem; font-weight: 500; }
+  .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 1rem; padding: 0 4px; }
+  .del-btn:hover { color: var(--red); }
+  .add-player-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .add-player-row select, .add-player-row input {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.88rem; padding: 9px 11px;
+  }
+  .add-player-row select { width: 78px; }
+  .add-player-row input { flex: 1; min-width: 110px; }
+  .add-player-row button {
+    padding: 9px 14px; background: var(--green); border: none;
+    border-radius: 8px; color: white;
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+  }
+  .modal-footer { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-footer button {
+    flex: 1; padding: 13px; border-radius: 12px;
+    font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer;
+  }
+  .btn-close { background: var(--green); border: none; color: white; }
+  .team-name-input {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 600;
+    padding: 9px 12px; width: 100%; margin-bottom: 12px;
+  }
+
+  /* STATS PAGE */
+  .stats-page {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 90;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .stats-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .stats-back-btn {
+    background: none; border: none;
+    font-size: 1.4rem; cursor: pointer;
+    color: var(--blue); padding: 0;
+    line-height: 1; font-weight: 300;
+  }
+  .stats-header-title {
+    font-size: 1rem; font-weight: 700; color: var(--text); flex: 1;
+  }
+  .stats-team-switcher {
+    display: flex;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .stats-team-btn {
+    padding: 5px 12px;
+    border: none; border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent; color: var(--text3);
+  }
+  .stats-team-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+  .stats-section-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 16px;
+    position: sticky;
+    top: 57px;
+    z-index: 9;
+  }
+  .stats-section-tab {
+    padding: 12px 16px;
+    border: none; background: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--text3); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .stats-section-tab.active {
+    color: var(--green-dark);
+    border-bottom-color: var(--green);
+  }
+  .stats-content-area { padding: 16px 14px 40px; }
+
+  /* Stats cards */
+  .stat-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card-title {
+    font-size: 0.75rem; font-weight: 700;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 14px;
+  }
+  .stat-hero-row {
+    display: flex; gap: 0;
+    border-radius: 10px; overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .stat-hero-item {
+    flex: 1; text-align: center;
+    padding: 12px 6px;
+    background: var(--surface2);
+    border-right: 1px solid var(--border);
+  }
+  .stat-hero-item:last-child { border-right: none; }
+  .stat-hero-val {
+    font-size: 1.5rem; font-weight: 800;
+    color: var(--text); letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .stat-hero-val.green { color: var(--green-dark); }
+  .stat-hero-label {
+    font-size: 0.6rem; font-weight: 600;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-top: 4px;
+  }
+  .stat-player-row {
+    display: flex; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .stat-player-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .stat-player-name { flex: 1; font-weight: 600; font-size: 0.9rem; color: var(--text); }
+  .stat-player-nums { display: flex; gap: 14px; }
+  .stat-num { text-align: right; }
+  .stat-num .val { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .stat-num .lbl { font-size: 0.58rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-empty { color: var(--text3); font-size: 0.85rem; text-align: center; padding: 24px 0; }
+
+  .stat-divider {
+    font-size: 0.65rem; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 10px 0 8px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .stat-hero-val.red { color: var(--red); }
+
+  /* Two-col OFF/DEF rows */
+  .two-col-header {
+    display: flex; align-items: center;
+    padding: 0 0 6px; margin-bottom: 2px;
+    border-bottom: 1px solid var(--border);
+  }
+  .two-col-header span:first-child { flex: 1; }
+  .tch {
+    width: 72px; text-align: center;
+    font-size: 0.65rem; font-weight: 700;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .two-col-row {
+    display: flex; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .two-col-row:last-child { border-bottom: none; }
+  .two-col-label { flex: 1; font-size: 0.85rem; font-weight: 500; color: var(--text2); }
+  .two-col-vals { display: flex; gap: 0; }
+  .two-col-val { width: 72px; text-align: center; }
+  .tcv-num { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .tcv-lbl { font-size: 0.58rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .play-bar-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .play-bar-label { font-size: 0.82rem; font-weight: 600; color: var(--text2); width: 64px; flex-shrink: 0; }
+  .play-bar-track {
+    flex: 1; height: 8px; background: var(--surface2);
+    border-radius: 4px; overflow: hidden;
+  }
+  .play-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .play-bar-pct { font-size: 0.78rem; font-weight: 700; color: var(--text3); width: 36px; text-align: right; }
+
+  /* Down distribution chart */
+  .down-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .down-row:last-child { border-bottom: none; }
+  .down-row-label {
+    font-size: 0.7rem; font-weight: 700; color: var(--text);
+    min-width: 52px; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .down-bar-wrap { flex: 1; }
+  .down-bar {
+    height: 20px; border-radius: 6px; overflow: hidden;
+    display: flex; background: var(--surface2); margin-bottom: 5px;
+  }
+  .down-seg { height: 100%; transition: width 0.4s ease; }
+  .down-seg.short  { background: #34c759; }
+  .down-seg.middle { background: #007aff; }
+  .down-seg.long   { background: #ff9500; }
+  .down-bar-nums { display: flex; gap: 10px; }
+  .dbn { font-size: 0.68rem; font-weight: 700; }
+  .dbn.short  { color: #34c759; }
+  .dbn.middle { color: #007aff; }
+  .dbn.long   { color: #ff9500; }
+
+  /* Named play rows */
+  .play-name-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .play-name-row:last-child { border-bottom: none; }
+  .pnr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .pnr-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+  .pnr-total { font-size: 0.85rem; font-weight: 700; color: var(--text3); }
+  .pnr-downs { display: flex; gap: 8px; margin-top: 4px; }
+  .pnr-d { font-size: 0.68rem; font-weight: 600; color: var(--border2); padding: 2px 6px; border-radius: 4px; background: var(--surface2); }
+  .pnr-d.active { color: var(--blue); background: var(--blue-bg); }
+
+  /* Stats page section tabs */
+  .stats-section-tab {
+    padding: 11px 14px;
+    border: none; background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem; font-weight: 600;
+    color: var(--text3); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+  }
+  .stats-section-tab.active { color: var(--green-dark); border-bottom-color: var(--green); }
+  .stats-section-tab:hover { color: var(--text2); }
+
+  /* Stats cards */
+  .stats-card {
+    background: var(--surface); border-radius: 14px;
+    padding: 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stats-card-title {
+    font-size: 0.72rem; font-weight: 700;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 12px;
+  }
+  .stats-big-row {
+    display: flex; gap: 0;
+  }
+  .stats-big-item {
+    flex: 1; text-align: center;
+    border-right: 1px solid var(--border); padding: 4px 8px;
+  }
+  .stats-big-item:last-child { border-right: none; }
+  .stats-big-val {
+    font-size: 1.6rem; font-weight: 800;
+    color: var(--text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stats-big-val.green { color: var(--green-dark); }
+  .stats-big-label {
+    font-size: 0.6rem; font-weight: 600;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-top: 3px;
+  }
+  .player-stat-row {
+    display: flex; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .player-stat-row:last-child { border-bottom: none; }
+  .player-stat-name { flex: 1; font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .player-stat-nums { display: flex; gap: 14px; }
+  .player-stat-num { text-align: right; }
+  .player-stat-num .val { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+  .player-stat-num .lbl { font-size: 0.58rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .play-call-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .play-call-row:last-child { border-bottom: none; }
+  .play-call-bar-wrap { margin-top: 6px; height: 5px; background: var(--border); border-radius: 3px; overflow:hidden; }
+  .play-call-bar { height: 100%; border-radius: 3px; background: var(--green); transition: width 0.4s; }
+
+  /* TD Banner */
+  .td-banner {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; backdrop-filter: blur(4px);
+  }
+  .td-banner-inner {
+    background: white; border-radius: 24px;
+    padding: 30px 44px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    animation: tdPop 0.28s cubic-bezier(0.17,0.89,0.32,1.27);
+  }
+  .td-emoji { font-size: 3rem; }
+  .td-text { font-size: 1.8rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; margin-top: 6px; }
+  @keyframes tdPop {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  @media (max-width: 660px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { max-height: 260px; border-left: none; border-top: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="score-board">
+    <!-- Tým A timeouty -->
+    <div class="timeout-dots">
+      <span class="to-label">TO</span>
+      <div class="to-dots">
+        <button class="to-dot" id="to-a-0" onclick="useTimeout('A',0)"></button>
+        <button class="to-dot" id="to-a-1" onclick="useTimeout('A',1)"></button>
+      </div>
+    </div>
+
+    <div class="team-score clickable" id="score-team-a" onclick="selectTeam('A')" title="Přepnout na útok">
+      <span class="name"><span class="ball-indicator" id="ball-ind-a">🏈 </span><span id="score-name-a">TÝM A</span></span>
+      <span class="pts" id="score-a">0</span>
+    </div>
+    <span class="score-sep">–</span>
+    <div class="team-score clickable" id="score-team-b" onclick="selectTeam('B')" title="Přepnout na útok">
+      <span class="name"><span class="ball-indicator" id="ball-ind-b" style="display:none">🏈 </span><span id="score-name-b">TÝM B</span></span>
+      <span class="pts" id="score-b">0</span>
+    </div>
+
+    <!-- Tým B timeouty -->
+    <div class="timeout-dots">
+      <span class="to-label">TO</span>
+      <div class="to-dots">
+        <button class="to-dot" id="to-b-0" onclick="useTimeout('B',0)"></button>
+        <button class="to-dot" id="to-b-1" onclick="useTimeout('B',1)"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button class="top-btn" onclick="openPlayers()" title="Hráči">👤</button>
+    <button class="top-btn" onclick="openStats()" title="Statistiky">📊</button>
+  </div>
+</div>
+
+<!-- OFFENSE BAR -->
+<div class="offense-bar" id="offense-bar">
+  <div class="offense-dot"></div>
+  <span id="offense-label">TÝM A · NA ÚTOKU</span>
+</div>
+
+<!-- STATUS CARD -->
+<div class="status-card">
+  <div class="status-row">
+    <div class="status-item">
+      <span class="label">Down</span>
+      <span class="value" id="st-down">1.</span>
+    </div>
+    <div class="status-item">
+      <span class="label" id="st-togo-label">Do 1st Down</span>
+      <span class="value blue" id="st-togo">25 yd</span>
+    </div>
+    <div class="status-item">
+      <span class="label">Míč na</span>
+      <span class="value" id="st-ball">vlastní 5</span>
+    </div>
+    <div class="status-item">
+      <span class="label">Do TD</span>
+      <span class="value green" id="st-totd">45 yd</span>
+    </div>
+  </div>
+  <div class="field-wrap">
+    <div class="field-bar">
+      <div class="field-ez-l"></div>
+      <div class="field-ez-r"></div>
+      <div class="field-mid"></div>
+      <div class="field-first-down" id="field-fd" style="left:50%"></div>
+      <div class="field-ball" id="field-ball" style="left:17.3%"></div>
+      <div id="field-arrow" style="left:12%">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="play-panel">
+
+    <div id="steps-container"></div>
+
+    <div class="section-label">Typ hraje</div>
+    <div class="play-grid">
+      <button class="play-btn pass" onclick="selectPlay('pass')">
+        <span class="icon">🏈</span><span class="label">Pass Play</span>
+      </button>
+      <button class="play-btn run" onclick="selectPlay('run')">
+        <span class="icon">🏃</span><span class="label">Rush Play</span>
+      </button>
+      <button class="play-btn sack" onclick="selectPlay('sack')">
+        <span class="icon">⚡</span><span class="label">Sack</span>
+      </button>
+      <button class="play-btn penalty" onclick="selectPlay('penalty')">
+        <span class="icon">🚩</span><span class="label">Penalty</span>
+      </button>
+      <button class="play-btn safety" onclick="selectPlay('safety')">
+        <span class="icon">🛡️</span><span class="label">Safety</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="section-label">Průběh hry</div>
+    <button class="undo-btn" onclick="undoPlay()">↩ Vrátit poslední</button>
+    <div class="play-log" id="play-log">
+      <div class="empty-log">Zatím žádná hra…</div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYERS MODAL -->
+<div class="modal-overlay" id="players-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="players-modal-title">Správa hráčů</h2>
+    <!-- Profile bar — volba týmu z klubu (Bobcats Ženy / Muži / Mládež…) -->
+    <div class="profile-bar">
+      <label for="profile-select" style="font-size:0.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em">Náš tým</label>
+      <select id="profile-select" onchange="switchProfile(this.value)" style="flex:1;padding:8px 28px 8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);font-family:inherit;font-size:0.85rem;font-weight:600;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22 viewBox=%220 0 10 6%22><path fill=%22%23888%22 d=%22M0 0l5 6 5-6z%22/></svg>');background-repeat:no-repeat;background-position:right 8px center"></select>
+      <button onclick="createProfile()" title="Vytvořit nový tým" style="padding:8px 12px;border:1px solid var(--border2);background:var(--surface2);border-radius:8px;cursor:pointer;font-size:0.95rem;font-weight:600;color:var(--blue)">+</button>
+      <button onclick="deleteProfile()" title="Smazat aktuální tým" style="padding:8px 10px;border:1px solid var(--border2);background:var(--surface2);border-radius:8px;cursor:pointer;font-size:0.85rem;color:var(--red)">🗑</button>
+    </div>
+    <div class="modal-team-tabs">
+      <button class="modal-tab active" id="ptab-a" onclick="switchPlayerTab('A')">TÝM A</button>
+      <button class="modal-tab" id="ptab-b" onclick="switchPlayerTab('B')">TÝM B</button>
+      <button class="modal-tab" id="ptab-pb" onclick="switchPlayerTab('PB')">Playbook</button>
+    </div>
+    <!-- Players section -->
+    <div id="players-section">
+      <input class="team-name-input" id="team-name-input" placeholder="Název týmu…" oninput="updateTeamName(this.value)" />
+      <div class="player-list" id="player-list"></div>
+      <div class="add-player-row">
+        <select id="new-pos">
+          <option value="QB">QB</option>
+          <option value="WR">WR</option>
+          <option value="DB">DB</option>
+        </select>
+        <input id="new-name" placeholder="Jméno hráče…" onkeydown="if(event.key==='Enter')addPlayer()" />
+        <button onclick="addPlayer()">+ Přidat</button>
+      </div>
+    </div>
+    <!-- Playbook section -->
+    <div id="playbook-section" style="display:none">
+      <div class="player-list" id="playbook-list"></div>
+      <div class="add-player-row">
+        <input id="new-play-name" placeholder="Název hry (např. Slant, Sweep…)" onkeydown="if(event.key==='Enter')addPlaybookPlay()" style="flex:1" />
+        <button onclick="addPlaybookPlay()">+ Přidat</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close" onclick="closePlayers()">Hotovo</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATS PAGE (fullscreen) -->
+<div id="stats-page" class="stats-page" style="display:none">
+  <div class="stats-header">
+    <button class="stats-back-btn" onclick="closeStats()">‹</button>
+    <div class="stats-header-title" id="stats-header-title">Statistiky</div>
+    <div class="stats-team-switcher">
+      <button class="stats-team-btn active" id="spage-tab-a" onclick="switchStatsTeam('A')">TÝM A</button>
+      <button class="stats-team-btn" id="spage-tab-b" onclick="switchStatsTeam('B')">TÝM B</button>
+    </div>
+  </div>
+  <div class="stats-section-tabs">
+    <button class="stats-section-tab active" id="stab-tymy"  onclick="switchStatsSection('tymy')">Týmy</button>
+    <button class="stats-section-tab"        id="stab-hraci" onclick="switchStatsSection('hraci')">Hráči</button>
+    <button class="stats-section-tab"        id="stab-plays" onclick="switchStatsSection('plays')">Playcalling</button>
+  </div>
+  <div class="stats-content-area" id="stats-page-content"></div>
+</div>
+
+<!-- TD BANNER -->
+<div class="td-banner" id="td-banner" style="display:none" onclick="this.style.display='none'">
+  <div class="td-banner-inner">
+    <div class="td-emoji">🏆</div>
+    <div class="td-text">TOUCHDOWN!</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ STATE ═══════════════
+// Field is 50yd total (endzone to endzone)
+// ball: yards from ATTACKING team's own goal line (0-50)
+// 0 = own goal, 50 = opp goal (TD)
+// 1st Down is ALWAYS fixed at 25yd (midfield)
+// Kickoff starts at own 5yd
+
+const state = {
+  teams: {
+    A: { name: 'TÝM A', players: [], score: 0, timeouts: [true, true] },
+    B: { name: 'TÝM B', players: [], score: 0, timeouts: [true, true] }
+  },
+  possession: 'A',
+  ball: 5,
+  firstDownAt: 25,
+  down: 1,
+  playLog: [],
+  awaitingExtraPoint: false,
+  tdScoringTeam: null,
+  drives: [],         // completed drives: { team, result: 'td'|'turnover'|'downs', plays, xpScored, xpAttempted }
+  currentDrive: { team: 'A', plays: 0, startBall: 5 },  // ongoing drive (startBall captured při zahájení)
+  playbook: []  // play names for Team A
+};
+
+// ═══════════════ PENALTIES (IFAF 2026 CZ) ═══════════════
+// Zdroj: docs/pravidla.md / docs/Flag-IFAF2026CZ.pdf
+// Atributy:
+//   id          stabilní identifikátor (do logu / Sheets)
+//   name_cz     český název pro UI
+//   name_en     anglický název (referenční)
+//   yards       základní yardáž (5 / 10 / 0)
+//   lod         útočný faul → ztráta downu
+//   afd         obranný faul → automatický 1st down (zároveň lod, pokud útok)
+//   spot        BS = basic spot, MF = místo faulu, SL = scrimmage line, KA = konec akce
+//   side        'offense' | 'defense' | 'both'
+//   deadBall    faul mimo živý míč → opakování downu (žádný posun downu)
+//   group       skupinka pro UI (10y AFD/LOD | 10y | 5y+LOD | 5y | LOD only)
+const PENALTIES = [
+  // ── Ztráta 10 yardů + AFD/LOD ─────────────────────────────────────────
+  { id:'pass_interference', name_cz:'Pass interference', name_en:'Pass interference',
+    yards:10, afd:true, lod:true, spot:'BS', side:'both', group:'10y_afd_lod' },
+  { id:'illegal_contact', name_cz:'Zakázaný kontakt', name_en:'Illegal contact',
+    yards:10, afd:true, lod:true, spot:'BS', side:'both', group:'10y_afd_lod' },
+  { id:'game_interference', name_cz:'Překážení', name_en:'Game interference',
+    yards:10, afd:true, lod:true, spot:'BS', side:'both', group:'10y_afd_lod' },
+
+  // ── Ztráta 10 yardů ───────────────────────────────────────────────────
+  { id:'unsportsmanlike_conduct', name_cz:'Nesportovní chování', name_en:'Unsportsmanlike conduct',
+    yards:10, spot:'KA', side:'both', deadBall:true, group:'10y' },
+
+  // ── Ztráta 5 yardů + LOD (vždy ztráta downu, je-li útok) ──────────────
+  { id:'illegal_kick_runner', name_cz:'Zakázaný kop', name_en:'Illegal kick by runner',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+  { id:'illegal_run', name_cz:'Zakázaný běh / nezahrání házecí akce', name_en:'Illegal run / illegal run play',
+    yards:5, lod:true, spot:'SL', side:'offense', group:'5y_lod' },
+  { id:'illegal_handoff', name_cz:'Zakázaná předávka', name_en:'Illegal hand-off',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+  { id:'illegal_backward_pass', name_cz:'Zakázaná přihrávka dozadu', name_en:'Illegal backward pass',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+  { id:'illegal_forward_pass', name_cz:'Zakázaná přihrávka dopředu', name_en:'Illegal forward pass',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+  { id:'illegal_batting', name_cz:'Odbití přihrávky dozadu směrem dopředu', name_en:'Illegal batting',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+  { id:'jumping_diving', name_cz:'Výskok nebo předklon (s flagem)', name_en:'Jumping / diving',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+  { id:'flag_guarding', name_cz:'Bránění flagu', name_en:'Flag guarding',
+    yards:5, lod:true, spot:'MF', side:'offense', group:'5y_lod' },
+
+  // ── Ztráta 5 yardů (bez LOD) ──────────────────────────────────────────
+  { id:'illegal_snap_before_ready', name_cz:'Rozehrání před ready for play', name_en:'Illegal snap (před ready)',
+    yards:5, spot:'KA', side:'offense', deadBall:true, group:'5y' },
+  { id:'delay_of_game', name_cz:'Zdržování hry', name_en:'Delay of game',
+    yards:5, spot:'KA', side:'offense', deadBall:true, group:'5y' },
+  { id:'illegal_snap', name_cz:'Zakázaný snap', name_en:'Illegal snap',
+    yards:5, spot:'KA', side:'offense', deadBall:true, group:'5y' },
+  { id:'false_start', name_cz:'False start', name_en:'False start',
+    yards:5, spot:'KA', side:'offense', deadBall:true, group:'5y' },
+  { id:'illegal_shift_motion', name_cz:'Zakázaný shift / motion', name_en:'Illegal shift / motion',
+    yards:5, spot:'SL', side:'offense', group:'5y' },
+  { id:'offside', name_cz:'Offside / rušení útoku', name_en:'Offside / disconcerting signals',
+    yards:5, spot:'KA', side:'defense', deadBall:true, group:'5y' },
+  { id:'illegal_blitzer_signal', name_cz:'Zakázané vyžádání přednosti pohybu blitzařem', name_en:'Illegal blitzer signal',
+    yards:5, spot:'KA', side:'defense', deadBall:true, group:'5y' },
+  { id:'illegal_blitz', name_cz:'Zakázaný blitz', name_en:'Illegal blitz',
+    yards:5, spot:'SL', side:'defense', group:'5y' },
+  { id:'shielding', name_cz:'Clona', name_en:'Shielding',
+    yards:5, spot:'BS', side:'offense', group:'5y' },
+  { id:'illegal_flag_pull', name_cz:'Zakázané stržení flagu', name_en:'Illegal flag pull',
+    yards:5, spot:'BS', side:'defense', group:'5y' },
+  { id:'illegal_kicking_pass', name_cz:'Kopnutí do přihrávky', name_en:'Illegal kicking a pass',
+    yards:5, spot:'BS', side:'both', group:'5y' },
+  { id:'illegal_participation', name_cz:'Hraní v 6+ hráčích', name_en:'Illegal participation (6+ players)',
+    yards:5, spot:'SL', side:'both', group:'5y' },
+  { id:'side_line_interference', name_cz:'Opuštění týmové zóny', name_en:'Side line interference',
+    yards:5, spot:'SL', side:'both', group:'5y' },
+  { id:'illegal_substitution', name_cz:'Nepovolené střídání', name_en:'Illegal substitution',
+    yards:5, spot:'SL', side:'both', group:'5y' },
+
+  // ── Pouze ztráta downu (bez yardů) ────────────────────────────────────
+  { id:'delay_of_pass', name_cz:'Neodhození přihrávky', name_en:'Delay of pass',
+    yards:0, lod:true, spot:'SL', side:'offense', group:'lod_only' },
+  { id:'illegal_touching', name_cz:'Zakázané dotknutí míče', name_en:'Illegal touching',
+    yards:0, lod:true, spot:'SL', side:'offense', group:'lod_only' },
+];
+
+// Lookup helpers — wizard volby a confirmPlay() pracují s českým názvem
+const PENALTY_BY_NAME = Object.fromEntries(PENALTIES.map(p => [p.name_cz, p]));
+const PENALTY_BY_ID = Object.fromEntries(PENALTIES.map(p => [p.id, p]));
+
+function useTimeout(team, idx) {
+  state.teams[team].timeouts[idx] = !state.teams[team].timeouts[idx];
+  updateTimeoutDots();
+}
+
+function updateTimeoutDots() {
+  ['A','B'].forEach(t => {
+    state.teams[t].timeouts.forEach((active, i) => {
+      const dot = document.getElementById(`to-${t.toLowerCase()}-${i}`);
+      if (dot) dot.className = 'to-dot' + (active ? '' : ' used');
+    });
+  });
+}
+
+// ═══════════════ FIELD LOGIC ═══════════════
+function updateFieldDisplay() {
+  const team = state.teams[state.possession];
+  document.getElementById('st-down').textContent = state.down + '.';
+
+  const toFD = state.firstDownAt - state.ball;
+  const toTD = 50 - state.ball;
+  const overHalf = state.ball >= 25;
+
+  document.getElementById('st-togo').textContent = overHalf ? toTD + ' yd' : Math.max(0, toFD) + ' yd';
+  document.getElementById('st-togo-label').textContent = overHalf ? 'Do TD' : 'Do 1st Down';
+  document.getElementById('st-ball').textContent = yardLabel(state.ball);
+  document.getElementById('st-totd').textContent = toTD + ' yd';
+
+  document.getElementById('score-name-a').textContent = state.teams.A.name;
+  document.getElementById('score-name-b').textContent = state.teams.B.name;
+  document.getElementById('score-a').textContent = state.teams.A.score;
+  document.getElementById('score-b').textContent = state.teams.B.score;
+
+  // Ball indicator & active highlight on score
+  document.getElementById('ball-ind-a').style.display = state.possession === 'A' ? 'inline' : 'none';
+  document.getElementById('ball-ind-b').style.display = state.possession === 'B' ? 'inline' : 'none';
+  document.getElementById('score-team-a').className = 'team-score clickable' + (state.possession==='A' ? ' active' : '');
+  document.getElementById('score-team-b').className = 'team-score clickable' + (state.possession==='B' ? ' active' : '');
+
+  // Offense bar
+  document.getElementById('offense-label').textContent = team.name + ' · NA ÚTOKU';
+  updateTimeoutDots();
+
+  // Field bar visual
+  let ballVisual = state.possession === 'A' ? state.ball : 50 - state.ball;
+  let fdVisual = 25; // always midfield
+  const fieldPct = 9.09 + (ballVisual / 50) * 81.82;
+  const fdPct = 9.09 + (fdVisual / 50) * 81.82;
+  document.getElementById('field-ball').style.left = fieldPct + '%';
+  document.getElementById('field-fd').style.left = fdPct + '%';
+
+  const arrow = document.getElementById('field-arrow');
+  if (arrow) {
+    arrow.textContent = state.possession === 'A' ? '→' : '←';
+    arrow.style.left = state.possession === 'A' ? '12%' : '82%';
+  }
+}
+
+function yardLabel(yd) {
+  if (yd < 25) return yd + ' yd';
+  if (yd === 25) return '25 yd';
+  return (50 - yd) + ' yd';
+}
+
+function advanceBall(yards) {
+  state.currentDrive.plays++;
+  const prevBall = state.ball;
+  state.ball = Math.max(0, Math.min(50, state.ball + yards));
+  if (state.ball >= 50) { touchdownScored(); return false; }
+
+  // 1st Down získán — míč dosáhl/překročil firstDownAt
+  if (state.ball >= state.firstDownAt) {
+    state.down = 1;
+    // Po překročení středové čáry je další 1st down meta = TD (goal line, 50).
+    // Před středem zůstává meta na 25. Tím se zabrání tomu, aby každý play
+    // za půlkou znovu generoval 1. down.
+    state.firstDownAt = (state.ball >= 25) ? 50 : 25;
+  } else {
+    state.down++;
+    if (state.down > 4) flipPossession('downs');
+  }
+  return true;
+}
+
+// Vytvoří nový drive a zachytí aktuální pozici míče jako startBall.
+// Volej AŽ POTÉ co je state.ball nastaven na novou výchozí pozici.
+function startDrive(team) {
+  state.currentDrive = { team, plays: 0, startBall: state.ball };
+}
+
+function closeDrive(result) {
+  state.drives.push({
+    team: state.currentDrive.team || state.possession,
+    result,
+    plays: state.currentDrive.plays,
+    startBall: state.currentDrive.startBall ?? state.ball,
+    endBall: state.ball,
+    xpScored: 0,
+    xpAttempted: 0
+  });
+  // Provizorní currentDrive — kdo bude zahajovat se rozhodne v call-site (flipPossession atd.)
+  // a ten zavolá startDrive(team) se správnou pozicí míče.
+  state.currentDrive = { team: state.possession === 'A' ? 'B' : 'A', plays: 0, startBall: state.ball };
+}
+
+function flipPossession(reason) {
+  closeDrive(reason || 'turnover');
+  const newPoss = state.possession === 'A' ? 'B' : 'A';
+  state.possession = newPoss;
+  state.ball = 5;
+  state.down = 1;
+  state.firstDownAt = 25;
+  startDrive(newPoss);
+  // Aktualizuj UI týmu ale neresetuj play wizard — to udělá confirmPlay
+  document.getElementById('tbtn-a') && (document.getElementById('tbtn-a').className = 'team-btn' + (newPoss==='A'?' active':''));
+  document.getElementById('tbtn-b') && (document.getElementById('tbtn-b').className = 'team-btn' + (newPoss==='B'?' active':''));
+  document.getElementById('ball-ind-a').style.display = newPoss==='A' ? 'inline' : 'none';
+  document.getElementById('ball-ind-b').style.display = newPoss==='B' ? 'inline' : 'none';
+  document.getElementById('score-team-a').className = 'team-score clickable' + (newPoss==='A'?' active':'');
+  document.getElementById('score-team-b').className = 'team-score clickable' + (newPoss==='B'?' active':'');
+  document.getElementById('offense-label').textContent = state.teams[newPoss].name + ' · NA ÚTOKU';
+}
+
+function touchdownScored() {
+  document.getElementById('td-banner').style.display = 'flex';
+  setTimeout(() => document.getElementById('td-banner').style.display = 'none', 2000);
+  state.tdScoringTeam = state.possession;
+  state.awaitingExtraPoint = true;
+  state.teams[state.possession].score += 6;
+  state.drives.push({
+    team: state.currentDrive.team || state.possession,
+    result: 'td',
+    plays: state.currentDrive.plays,
+    startBall: state.currentDrive.startBall ?? state.ball,
+    endBall: state.ball,                              // typicky 50 (goal line)
+    xpScored: 0,
+    xpAttempted: 0
+  });
+  // Provizorní — skutečný startDrive volá XP confirm po kickoff resetu míče
+  state.currentDrive = { team: state.possession === 'A' ? 'B' : 'A', plays: 0, startBall: 5 };
+  // Reset XP wizard state
+  xpSel = {};
+  // Ball stays at 50 until XP type selected — renderXPWizard will set it
+  renderXPWizard();
+  updateFieldDisplay();
+}
+
+// ── Extra Point Wizard ──
+let xpSel = {};
+
+function renderXPWizard() {
+  const c = document.getElementById('steps-container');
+  const scoringTeam = state.teams[state.tdScoringTeam];
+  const defTeamKey = state.tdScoringTeam === 'A' ? 'B' : 'A';
+  const defTeam = state.teams[defTeamKey];
+  const qbs = scoringTeam.players.filter(p=>p.pos==='QB');
+  const wrs = scoringTeam.players.filter(p=>p.pos==='WR');
+  const defAll = defTeam.players;
+
+  // Build steps
+  let steps = [
+    { key:'xpType', label:'🏆 Potvrzení — vyber typ', options:['1PT – z 5yd','2PT – z 10yd','Přeskočit'] },
+  ];
+  if (xpSel.xpType === '1PT – z 5yd' || xpSel.xpType === '2PT – z 10yd') {
+    if (scoringTeam.players.length > 0) {
+      steps.push({ key:'xpQb', label:'QB', options: qbs.map(p=>p.name) });
+      steps.push({ key:'xpWr', label:'WR (příjemce)', options: wrs.map(p=>p.name) });
+    }
+    if (defAll.length > 0)
+      steps.push({ key:'xpDef', label:`Obránce (${defTeam.name})`, options:['—',...defAll.map(p=>p.name)] });
+    steps.push({ key:'xpResult', label:'Výsledek', options:['Úspěšné ✓','Neúspěšné ✗'], classes:['','neg'] });
+  }
+  // Přeskočit = done immediately
+
+  // Find current step
+  let currentIdx = 0;
+  let breadcrumb = [];
+  for (let i = 0; i < steps.length; i++) {
+    if (xpSel[steps[i].key] !== undefined) {
+      breadcrumb.push(xpSel[steps[i].key]);
+      currentIdx = i + 1;
+    } else break;
+  }
+
+  const allDone = currentIdx >= steps.length || xpSel.xpType === 'Přeskočit';
+
+  // Breadcrumb HTML
+  const bcHtml = breadcrumb.length > 0
+    ? `<div class="wizard-breadcrumb">${breadcrumb.map((v,i)=>
+        `<span class="breadcrumb-item">${i>0?'<span class="breadcrumb-sep">›</span>':''}<span class="bc-val">${v}</span></span>`
+      ).join('')}</div>`
+    : '';
+
+  let stepHtml = '';
+  if (allDone) {
+    stepHtml = `<div class="wizard-step"><button class="confirm-btn" style="background:var(--gold);color:#fff" onclick="finishExtraPoint()">Potvrdit potvrzení →</button></div>`;
+  } else {
+    const step = steps[currentIdx];
+    const btns = step.options.map((opt,i) => {
+      const cls = (step.classes && step.classes[i]) ? ' '+step.classes[i] : '';
+      return `<button class="choice-btn${cls}" onclick="xpWizardSelect('${step.key}','${opt.replace(/'/g,"\\'")}')">${opt}</button>`;
+    }).join('');
+    stepHtml = `<div class="wizard-step">
+      <div class="step-label">${step.label}</div>
+      <div class="choice-grid">${btns}</div>
+    </div>`;
+  }
+
+  c.innerHTML = `<div class="wizard-wrap">${bcHtml}${stepHtml}</div>`;
+}
+
+function xpWizardSelect(key, val) {
+  xpSel[key] = val;
+  // Nastavit pozici míče dle IFAF: 1PT z 45yd čáry (5yd od TD), 2PT z 40yd čáry (10yd od TD)
+  if (key === 'xpType') {
+    if (val === '1PT – z 5yd')  state.ball = 45; // 5yd od endzone soupeře
+    if (val === '2PT – z 10yd') state.ball = 40; // 10yd od endzone soupeře
+    updateFieldDisplay();
+  }
+  renderXPWizard();
+}
+
+function finishExtraPoint() {
+  const snap = JSON.parse(JSON.stringify(state));
+  const teamName = state.teams[state.tdScoringTeam].name;
+  const lastDrive = state.drives[state.drives.length - 1];
+
+  let pts = 0;
+  let desc = '';
+  let badge = 'xp0';
+  let xpPts = 0;
+
+  if (xpSel.xpType === '1PT – z 5yd') {
+    const success = xpSel.xpResult === 'Úspěšné ✓';
+    pts = success ? 1 : 0;
+    const players = xpSel.xpQb && xpSel.xpWr ? `${xpSel.xpQb} → ${xpSel.xpWr}` : '';
+    const def = xpSel.xpDef && xpSel.xpDef !== '—' ? ` · ${xpSel.xpDef}` : '';
+    desc = success ? `1PT ✓ (z 5yd) ${players}${def}` : `1PT ✗ (z 5yd) ${players}${def}`;
+    badge = success ? 'xp1' : 'xp0';
+    xpPts = 1;
+    if (lastDrive) { lastDrive.xpAttempted = 1; lastDrive.xpScored = success ? 1 : 0; }
+  } else if (xpSel.xpType === '2PT – z 10yd') {
+    const success = xpSel.xpResult === 'Úspěšné ✓';
+    pts = success ? 2 : 0;
+    const def = xpSel.xpDef && xpSel.xpDef !== '—' ? ` · ${xpSel.xpDef}` : '';
+    const players = xpSel.xpQb && xpSel.xpWr ? `${xpSel.xpQb} → ${xpSel.xpWr}` : '';
+    desc = success ? `2PT ✓ (z 10yd) ${players}${def}` : `2PT ✗ (z 10yd) ${players}${def}`;
+    badge = success ? 'xp2' : 'xp0';
+    xpPts = 2;
+    if (lastDrive) { lastDrive.xpAttempted = 2; lastDrive.xpScored = success ? 2 : 0; }
+  } else {
+    desc = 'Potvrzení přeskočeno';
+    badge = 'xp0';
+  }
+
+  if (pts > 0) state.teams[state.tdScoringTeam].score += pts;
+
+  state.playLog.unshift({ teamName, downStr: 'Potvrzení', badge, desc, snap, xpPts });
+
+  // Switch possession
+  const newPoss = state.tdScoringTeam === 'A' ? 'B' : 'A';
+  state.possession = newPoss;
+  state.ball = 5; state.down = 1; state.firstDownAt = 25;
+  state.awaitingExtraPoint = false; state.tdScoringTeam = null;
+  startDrive(newPoss);                              // ball už je na 5 → kickoff start
+  xpSel = {};
+  selectTeam(newPoss);
+  renderLog(); updateFieldDisplay();
+}
+
+function renderExtraPointChoice() { renderXPWizard(); } // legacy alias
+
+// ═══════════════ PLAY SELECTION ═══════════════
+let currentPlay = null;
+let sel = {};
+
+function selectTeam(t) {
+  state.possession = t;
+  if (!state.awaitingExtraPoint) resetPlay();
+  updateFieldDisplay();
+  if (state.awaitingExtraPoint) renderXPWizard();
+}
+
+function selectPlay(type) {
+  if (state.awaitingExtraPoint) { renderXPWizard(); return; }
+  currentPlay = type;
+  sel = {};
+  document.querySelectorAll('.play-btn').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  renderSteps();
+}
+
+function renderSteps() {
+  const c = document.getElementById('steps-container');
+  const offTeam = state.teams[state.possession];
+  const defTeamKey = state.possession === 'A' ? 'B' : 'A';
+  const defTeam = state.teams[defTeamKey];
+  const offPlayers = offTeam.players;
+  const defPlayers = defTeam.players;
+  const qbs = offPlayers.filter(p=>p.pos==='QB');
+  const wrs = offPlayers.filter(p=>p.pos==='WR');
+  const dbs = defPlayers.filter(p=>p.pos==='DB');
+  const defAll = defPlayers;
+  const hasDef = defAll.length > 0;
+  const hasOff = offPlayers.length > 0; // skip off player steps if attacking team has no players
+
+  let steps = [];
+  let breadcrumb = [];
+
+  if (currentPlay === 'run') {
+    steps = [
+      ...(hasOff ? [{ key:'runner', label:'Hráč (kdo běží)', options: [...qbs, ...wrs].map(p=>p.name) }] : []),
+      { key:'runYds', label:'Počet yardů', type:'yard', vals:[-5,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,15,20] },
+      ...(hasDef ? [{ key:'defType', label:`Obranný zákrok (${defTeam.name})`, options:['—','Flag Pull'] }] : []),
+      ...(hasDef && sel.defType && sel.defType !== '—' ? [{ key:'defPlayer', label:'Obránce', options:['—',...defAll.map(p=>p.name)] }] : []),
+      ...(state.possession === 'A' && state.playbook.length > 0 ? [{ key:'playName', label:'Název hry', options:['—',...state.playbook] }] : []),
+    ];
+  } else if (currentPlay === 'pass') {
+    steps = [
+      ...(hasOff ? [{ key:'qb', label:'QB', options: qbs.map(p=>p.name) }] : []),
+      ...(hasOff ? [{ key:'wr', label:'WR (cíl přihrávky)', options: wrs.map(p=>p.name) }] : []),
+      { key:'passResult', label:'Výsledek', options:['Chyceno','Nekompletní','INT','INT-TD'], classes:['','neg','neg','neg'] },
+    ];
+    if (sel.passResult === 'Chyceno') {
+      steps.push({ key:'passYds', label:'Počet yardů', type:'yard', vals:[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,40,50] });
+      if (hasDef) {
+        // Po chycení míč drží WR — žádný "Sražený balón", jen flag pull
+        steps.push({ key:'defType', label:`Obranný zákrok (${defTeam.name})`, options:['—','Flag Pull'] });
+        if (sel.defType && sel.defType !== '—')
+          steps.push({ key:'defPlayer', label:'Obránce', options:['—',...defAll.map(p=>p.name)] });
+      }
+      if (state.possession === 'A' && state.playbook.length > 0)
+        steps.push({ key:'playName', label:'Název hry', options:['—',...state.playbook] });
+    } else if (sel.passResult === 'Nekompletní') {
+      if (hasDef) {
+        // Nekompletní pass — obrana mohla míč fyzicky srazit (breakup)
+        steps.push({ key:'defType', label:`Obranný zákrok (${defTeam.name})`, options:['—','Sražený balón'] });
+        if (sel.defType && sel.defType !== '—')
+          steps.push({ key:'defPlayer', label:'Obránce', options:['—',...defAll.map(p=>p.name)] });
+      }
+      if (state.possession === 'A' && state.playbook.length > 0)
+        steps.push({ key:'playName', label:'Název hry', options:['—',...state.playbook] });
+    } else if (sel.passResult === 'INT' || sel.passResult === 'INT-TD') {
+      if (hasDef)
+        steps.push({ key:'intDb', label:`DB zachytil (${defTeam.name})`, options: dbs.length ? dbs.map(p=>p.name) : defAll.map(p=>p.name) });
+      if (sel.passResult === 'INT' && (sel.intDb !== undefined || !hasDef))
+        steps.push({ key:'intReturnYds', label:'Návrat INT (yardy od vlastní endzone)', type:'yard', vals:[5,10,15,20,25,30,35,40,45] });
+    }
+  } else if (currentPlay === 'sack') {
+    steps = [
+      ...(hasOff ? [{ key:'sackQb', label:'QB (sacknutý)', options: qbs.map(p=>p.name) }] : []),
+      ...(hasDef ? [{ key:'sackDef', label:`Sackoval (${defTeam.name})`, options:['—',...defAll.map(p=>p.name)] }] : []),
+      { key:'sackYds', label:'Ztráta yardů', type:'yard', vals:[-15,-12,-10,-8,-7,-6,-5,-4,-3,-2,-1] },
+      ...(state.possession === 'A' && state.playbook.length > 0 ? [{ key:'playName', label:'Název hry', options:['—',...state.playbook] }] : []),
+    ];
+  } else if (currentPlay === 'penalty') {
+    // 1) Strana faulu  ──→ 2) filtrovaný seznam faulů ──→ 3) hráč z dané strany ──→ 4) yardáž
+    const penSideLabel = sel.penSide;                       // 'Útok' | 'Obrana'
+    const penSide = penSideLabel === 'Útok' ? 'offense'
+                  : penSideLabel === 'Obrana' ? 'defense' : null;
+
+    const sideStep = { key:'penSide', label:'Strana faulu', options:['Útok','Obrana'] };
+
+    const filteredFauls = penSide
+      ? PENALTIES.filter(p => p.side === penSide || p.side === 'both')
+      : [];
+    const faulStep = { key:'penType', label:'Faul', options: filteredFauls.map(p => p.name_cz) };
+
+    let playerStep = null;
+    if (penSide === 'offense' && hasOff) {
+      playerStep = { key:'penPlayer', label:'Hráč útoku (volitelné)',
+                     options:['—', ...offPlayers.map(p=>p.name)] };
+    } else if (penSide === 'defense' && hasDef) {
+      playerStep = { key:'penPlayer', label:`Hráč obrany (${defTeam.name}, volitelné)`,
+                     options:['—', ...defAll.map(p=>p.name)] };
+    }
+
+    const meta = sel.penType ? PENALTY_BY_NAME[sel.penType] : null;
+    let yardStep = null;
+    if (meta) {
+      const sign = penSide === 'offense' ? -1 : 1;
+      const canonical = meta.yards * sign;            // např. −5 / +10 / 0
+      const lodHint = meta.lod ? ' + LOD' : (meta.afd ? ' + AFD' : '');
+      const yLabel = meta.yards === 0
+        ? `Yardáž — bez posunu${lodHint}`
+        : `Yardáž — ${penSide === 'offense' ? 'ztráta' : 'zisk'} ${meta.yards} yd${lodHint}`;
+      yardStep = { key:'penYds', label: yLabel, type:'yard', vals:[canonical] };
+    }
+
+    steps = [
+      sideStep,
+      ...(penSide ? [faulStep] : []),
+      ...(playerStep ? [playerStep] : []),
+      ...(yardStep ? [yardStep] : []),
+    ];
+  } else if (currentPlay === 'safety') {
+    steps = [
+      ...(hasOff ? [{ key:'safetyQb', label:'QB (zachycen v endzóně)', options: qbs.map(p=>p.name) }] : []),
+      ...(hasDef ? [{ key:'safetyDef', label:`Zachytil (${defTeam.name})`, options:['—',...defAll.map(p=>p.name)] }] : []),
+    ];
+  } else if (currentPlay === 'td') {
+    steps = [
+      ...(hasOff ? [{ key:'tdPlayer', label:'QB / hráč skóroval', options:[...qbs,...wrs].map(p=>p.name) }] : []),
+    ];
+  }
+
+  // Find first unanswered step
+  let currentStepIdx = 0;
+  for (let i = 0; i < steps.length; i++) {
+    if (sel[steps[i].key] !== undefined) {
+      breadcrumb.push({ label: steps[i].label, val: sel[steps[i].key] });
+      currentStepIdx = i + 1;
+    } else {
+      break;
+    }
+  }
+
+  const allDone = currentStepIdx >= steps.length;
+  const isNekompletniWithDef = currentPlay === 'pass' && sel.passResult === 'Nekompletní' &&
+    (!hasDef || (sel.defType !== undefined && (sel.defType === '—' || sel.defPlayer !== undefined))) &&
+    (state.possession !== 'A' || state.playbook.length === 0 || sel.playName !== undefined);
+  const isNekompletniDone = isNekompletniWithDef;
+
+  // Build wizard HTML
+  // Breadcrumb
+  let bcHtml = '';
+  if (breadcrumb.length > 0) {
+    bcHtml = breadcrumb.map((b, i) =>
+      `<span class="breadcrumb-item">${i>0?'<span class="breadcrumb-sep">›</span>':''}<span class="bc-val">${b.val}</span></span>`
+    ).join('');
+  }
+
+  // Current step or confirm
+  let stepHtml = '';
+  if (allDone || isNekompletniDone) {
+    // Show confirm button
+    stepHtml = `<div class="wizard-step"><button class="confirm-btn" onclick="confirmPlay()">Potvrdit hraju →</button></div>`;
+  } else if (currentStepIdx < steps.length) {
+    const step = steps[currentStepIdx];
+    if (step.type === 'yard') {
+      stepHtml = buildYardStep(step);
+    } else {
+      stepHtml = buildChoiceStep(step);
+    }
+  }
+
+  if (!stepHtml && !bcHtml) { c.innerHTML = ''; return; }
+
+  c.innerHTML = `
+    <div class="wizard-wrap">
+      ${bcHtml ? `<div class="wizard-breadcrumb">${bcHtml}</div>` : ''}
+      ${stepHtml}
+    </div>`;
+
+  // Attach yard input listener if needed
+  if (currentStepIdx < steps.length && steps[currentStepIdx] && steps[currentStepIdx].type === 'yard') {
+    const key = steps[currentStepIdx].key;
+    const inp = c.querySelector(`#yard-inp-${key}`);
+    if (inp) inp.addEventListener('input', () => {
+      const v = parseInt(inp.value);
+      if (!isNaN(v)) { sel[key] = v; renderSteps(); }
+    });
+  }
+}
+
+function buildChoiceStep(step) {
+  if (!step.options || step.options.length === 0) {
+    return `<div class="wizard-step"><div style="color:var(--red);font-size:0.82rem">⚠ Nejsou přidáni hráči pro tuto pozici</div></div>`;
+  }
+  const btns = step.options.map((opt, i) => {
+    const cls = (step.classes && step.classes[i]) ? ' ' + step.classes[i] : '';
+    return `<button class="choice-btn${cls}" onclick="wizardSelect('${step.key}','${opt.replace(/'/g,"\\'")}')">
+      ${opt}
+    </button>`;
+  }).join('');
+  return `<div class="wizard-step">
+    <div class="step-label">${step.label}</div>
+    <div class="choice-grid">${btns}</div>
+  </div>`;
+}
+
+function buildYardStep(step) {
+  const val = sel[step.key] !== undefined ? sel[step.key] : '';
+  const btns = step.vals.map(v =>
+    `<button class="yard-quick-btn" onclick="wizardYard('${step.key}',${v})">${v>=0?'+':''}${v}</button>`
+  ).join('');
+  return `<div class="wizard-step">
+    <div class="step-label">${step.label}</div>
+    <div class="yard-input-wrap">
+      <input type="number" class="yard-input" id="yard-inp-${step.key}" value="${val}" placeholder="0" />
+      <div class="yard-quick">${btns}</div>
+    </div>
+  </div>`;
+}
+
+function wizardSelect(key, val) {
+  sel[key] = val;
+  renderSteps();
+}
+
+function wizardYard(key, val) {
+  sel[key] = val;
+  renderSteps();
+}
+
+function addStep() {} // legacy stub
+function addYardStep() {} // legacy stub
+function addConfirm() {} // legacy stub
+
+// Lookup helpers — derivováno z PENALTIES (jediný zdroj pravdy):
+//   isDead       — dead-ball faul → opakování downu
+//   isAutoFirst  — obranný faul s AFD a yds > 0 (ref signalizoval ve prospěch útoku)
+// Plná LOD/AFD logika podle strany faulu je ještě TODO (viz pravidla.md, krok 3).
+function penaltyMeta(name) { return PENALTY_BY_NAME[name] || null; }
+
+// ═══════════════ CONFIRM PLAY ═══════════════
+function confirmPlay() {
+  // Snapshot stavu před hrou — ALE bez playLog a drives.
+  // Důvod: playLog obsahuje pro každý play vlastní snap, takže kdybychom
+  // klonovali playLog dovnitř každého nového snapu, struktura by rostla
+  // exponenciálně (play N obsahuje snap N obsahující playLog s plays 1..N-1
+  // a každý z nich má svůj snap atd.). To po cca 15 plays zpomaluje aplikaci
+  // do stavu, kdy se zaseká. Snap potřebujeme jen pro derivaci side/down/ball
+  // při ukládání do Sheets — bohatě stačí non-recursive část state.
+  const { playLog, drives, ...restState } = state;
+  const snap = JSON.parse(JSON.stringify(restState));
+  let desc='', badge=currentPlay, yds=0;
+  const downStr = state.down + '. down · ' + yardLabel(state.ball);
+  const teamName = state.teams[state.possession].name;
+  const defName = state.teams[state.possession==='A'?'B':'A'].name;
+  const defSuffix = (type, player) => {
+    if (!type||type==='—') return '';
+    const p = (!player||player==='—')?'':`  (${player})`;
+    return ` · ${type}${p}`;
+  };
+
+  const playNameSuffix = (sel.playName && sel.playName !== '—') ? ` [${sel.playName}]` : '';
+  const playName = (sel.playName && sel.playName !== '—') ? sel.playName : null;
+
+  if (currentPlay==='run') {
+    yds=sel.runYds??0;
+    desc=`${sel.runner} run ${yds>=0?'+':''}${yds} yd${defSuffix(sel.defType,sel.defPlayer)}${playNameSuffix}`;
+    const wasTD = (state.ball + yds) >= 50;
+    advanceBall(yds);
+    badge = wasTD ? 'run_td' : 'run';
+    const entry = {teamName, downStr, badge, desc, snap, yds, playName,
+      runner: sel.runner, isTD: wasTD};
+    state.playLog.unshift(entry);
+    renderLog(); resetPlay();
+    if (!wasTD) updateFieldDisplay();
+    return;
+
+  } else if (currentPlay==='pass') {
+    if (sel.passResult==='Chyceno') {
+      yds=sel.passYds??0;
+      desc=`${sel.qb} → ${sel.wr}  +${yds} yd${defSuffix(sel.defType,sel.defPlayer)}${playNameSuffix}`;
+      const wasTD = (state.ball + yds) >= 50;
+      advanceBall(yds);
+      badge = wasTD ? 'pass_td' : 'pass';
+      const entry = {teamName, downStr, badge, desc, snap, yds, playName, qb: sel.qb, wr: sel.wr, isTD: wasTD};
+      state.playLog.unshift(entry);
+      renderLog(); resetPlay();
+      if (!wasTD) updateFieldDisplay();
+      return;
+    } else if (sel.passResult==='Nekompletní') {
+      desc=`${sel.qb} → ${sel.wr} nekompletní${defSuffix(sel.defType,sel.defPlayer)}${playNameSuffix}`;
+      state.currentDrive.plays++;
+      state.down++;
+      if(state.down>4) flipPossession('downs');
+      badge='pass';
+    } else if (sel.passResult==='INT') {
+      desc=`${sel.qb} INT — zachytil ${sel.intDb||'?'} (${defName}), návrat na ${sel.intReturnYds||5} yd`;
+      state.currentDrive.plays++;
+      const intReturn = sel.intReturnYds || 5;
+      closeDrive('int');
+      const newPoss = state.possession === 'A' ? 'B' : 'A';
+      state.possession = newPoss;
+      state.ball = Math.min(intReturn, 49);
+      state.down = 1;
+      state.firstDownAt = 25;
+      startDrive(newPoss);
+      state.playLog.unshift({teamName, downStr, badge:'pass', desc, snap, yds: 0, playName, isInt: true});
+      renderLog();
+      resetPlay();
+      updateFieldDisplay();
+      return;
+    } else if (sel.passResult==='INT-TD') {
+      desc=`${sel.qb} INT-TD — ${sel.intDb} (${defName}) vrátil na TD!`;
+      state.currentDrive.plays++;
+      const defKey=state.possession==='A'?'B':'A';
+      state.teams[defKey].score+=6;
+      state.tdScoringTeam=defKey; state.awaitingExtraPoint=true;
+      state.drives.push({ team: state.possession, result: 'int',
+        plays: state.currentDrive.plays,
+        startBall: state.currentDrive.startBall ?? state.ball,
+        endBall: state.ball,
+        xpScored:0, xpAttempted:0 });
+      state.drives.push({ team: defKey, result: 'td',
+        plays: 1, startBall: state.ball, endBall: 50,
+        xpScored:0, xpAttempted:0 });
+      // Provizorní — startDrive zavolá XP confirm po kickoff resetu
+      state.currentDrive = { team: state.possession === 'A' ? 'B' : 'A', plays: 0, startBall: 5 };
+      state.playLog.unshift({teamName,downStr,badge:'inttd',desc,snap,yds:0,playName,qb:sel.qb,wr:sel.wr,isInt:true,isTD:true});
+      renderLog(); resetPlay(); renderExtraPointChoice(); return;
+    }
+    badge='pass';
+  } else if (currentPlay==='sack') {
+    yds=sel.sackYds??-5;
+    const def=sel.sackDef&&sel.sackDef!=='—'?` · ${sel.sackDef}`:'';
+    desc=`${sel.sackQb} sack ${yds} yd${def}${playNameSuffix}`;
+    // advanceBall already increments down — don't do it again
+    advanceBall(yds); badge='sack';
+  } else if (currentPlay==='penalty') {
+    yds=sel.penYds??0;
+    const pl=sel.penPlayer==='—'?'':` (${sel.penPlayer})`;
+    const sideTag = sel.penSide ? ` [${sel.penSide}]` : '';
+    const meta = penaltyMeta(sel.penType);
+    // Strana faulu jako ground truth (na fauly typu 'both' rozhoduje výběr v wizardu)
+    const sideOff   = sel.penSide === 'Útok';
+    const sideDef   = sel.penSide === 'Obrana';
+    const isDead    = !!(meta && meta.deadBall);
+    const isAFD     = !!(meta && meta.afd) && sideDef;   // obranný faul → automatický 1st down
+    const isLOD     = !!(meta && meta.lod) && sideOff;   // útočný faul → ztráta downu navíc k yardáži
+    const lodTag    = isLOD ? ' + LOD' : (isAFD ? ' + AFD' : '');
+    desc = `Penalty${sideTag}: ${sel.penType}${pl}, ${yds>=0?'+':''}${yds} yd${lodTag}`;
+
+    // Posun míče (yardáž)
+    state.ball = Math.max(0, Math.min(50, state.ball + yds));
+
+    if (isAFD) {
+      // Automatický 1st down pro útočící tým
+      state.down = 1;
+      // Pokud útok byl už za středem, další meta = TD (goal line). Jinak střed.
+      state.firstDownAt = (state.ball >= 25) ? 50 : 25;
+    } else if (isLOD) {
+      // Útok ztrácí down navíc — pokud byl 4., přechází míč soupeři
+      state.down++;
+      if (state.down > 4) {
+        // Turnover on downs — flipPossession se postará o stranu, ball, drive
+        flipPossession('downs');
+      }
+      // pokud byl posun přes metu, AFD-by-yardage neaplikujeme — LOD má přednost
+    } else if (isDead) {
+      // Dead-ball faul → opakuje se down (žádná změna downu)
+    } else {
+      // Live ball bez LOD/AFD — pokud yardáž posunula přes metu, nový 1st down
+      if (state.ball >= state.firstDownAt) {
+        state.down = 1;
+        // Pokud jsme za středem, další meta je TD. Před středem střed.
+        state.firstDownAt = (state.ball >= 25) ? 50 : 25;
+      }
+      // jinak down zůstává (replay)
+    }
+    badge='penalty';
+
+    // Strukturovaný záznam faulu (pro výstup do Sheets list "[Tým] - Fauly")
+    state.playLog.unshift({
+      teamName, downStr, badge, desc, snap, yds, playName,
+      pen: {
+        side:    sel.penSide || null,
+        faulCz:  sel.penType || null,
+        faulId:  meta ? meta.id : null,
+        player:  (sel.penPlayer && sel.penPlayer !== '—') ? sel.penPlayer : null,
+        yards:   yds,
+        lod:     isLOD,
+        afd:     isAFD,
+        deadBall: isDead,
+      }
+    });
+    renderLog(); resetPlay(); updateFieldDisplay();
+    return;
+  } else if (currentPlay==='safety') {
+    const def=sel.safetyDef&&sel.safetyDef!=='—'?` · ${sel.safetyDef}`:'';
+    desc=`Safety — ${sel.safetyQb} v endzóně${def}`;
+    state.teams[state.possession==='A'?'B':'A'].score+=2;
+    state.currentDrive.plays++;
+    // flipPossession already calls closeDrive — don't call it separately
+    flipPossession('safety');
+    state.ball=5; state.down=1; state.firstDownAt=25; badge='safety';
+  } else if (currentPlay==='td') {
+    desc=`TOUCHDOWN — ${sel.tdPlayer}`;
+    state.playLog.unshift({teamName,downStr,badge:'td',desc,snap, yds: 0, playName, isTD: true});
+    renderLog(); touchdownScored(); return;
+  }
+
+  state.playLog.unshift({teamName, downStr, badge, desc, snap, yds, playName,
+    xpPts: state.awaitingExtraPoint ? (state.lastXpPts||0) : undefined
+  });
+  renderLog(); resetPlay(); updateFieldDisplay();
+}
+
+function resetPlay() {
+  currentPlay=null; sel={};
+  document.querySelectorAll('.play-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('steps-container').innerHTML='';
+}
+
+// ═══════════════ LOG ═══════════════
+function renderLog() {
+  const log = document.getElementById('play-log');
+  if (state.playLog.length===0) { log.innerHTML='<div class="empty-log">Zatím žádná hra…</div>'; return; }
+  const badgeLabel = {run:'Rush',run_td:'Rush TD 🏆',pass:'Pass',pass_td:'Pass TD 🏆',sack:'Sack',penalty:'Foul',safety:'Safety',td:'TD 🏆',inttd:'INT-TD',xp1:'+1 XP ✓',xp2:'+2 XP ✓',xp0:'XP ✗'};
+  log.innerHTML = state.playLog.map(p=>`
+    <div class="play-log-item">
+      <div class="play-meta">
+        <span class="play-type-badge ${p.badge}">${badgeLabel[p.badge]||p.badge.toUpperCase()}</span>
+        <span class="down-info">${p.teamName} · ${p.downStr}</span>
+      </div>
+      <div class="play-desc">${p.desc}</div>
+    </div>`).join('');
+}
+
+function undoPlay() {
+  if (state.playLog.length===0) return;
+  const last=state.playLog.shift();
+  Object.assign(state,last.snap);
+  renderLog(); updateFieldDisplay();
+}
+
+// ═══════════════ PLAYERS MODAL ═══════════════
+let playerTab='A';
+function openPlayers() {
+  playerTab='A';
+  document.getElementById('players-modal').style.display='flex';
+  renderProfileSelector();   // naplnit dropdown profilů
+  renderPlayerList();
+}
+function closePlayers() { document.getElementById('players-modal').style.display='none'; updateFieldDisplay(); }
+function switchPlayerTab(t) {
+  playerTab=t;
+  document.getElementById('ptab-a').className='modal-tab'+(t==='A'?' active':'');
+  document.getElementById('ptab-b').className='modal-tab'+(t==='B'?' active':'');
+  document.getElementById('ptab-pb').className='modal-tab'+(t==='PB'?' active':'');
+  document.getElementById('players-section').style.display = t==='PB' ? 'none' : 'block';
+  document.getElementById('playbook-section').style.display = t==='PB' ? 'block' : 'none';
+  document.getElementById('players-modal-title').textContent = t==='PB' ? 'Playbook' : 'Správa hráčů';
+  if (t==='PB') renderPlaybookList(); else renderPlayerList();
+}
+function renderPlayerList() {
+  const team=state.teams[playerTab];
+  document.getElementById('team-name-input').value=team.name;
+  const list=document.getElementById('player-list');
+  list.innerHTML=team.players.map((p,i)=>`
+    <div class="player-row">
+      <span class="pos-badge ${p.pos.toLowerCase()}">${p.pos}</span>
+      <span class="pname">${p.name}</span>
+      <button class="del-btn" onclick="removePlayer(${i})">✕</button>
+    </div>`).join('')||'<div style="color:var(--text3);font-size:0.82rem;padding:8px">Žádní hráči</div>';
+}
+function renderPlaybookList() {
+  const list = document.getElementById('playbook-list');
+  list.innerHTML = state.playbook.map((name,i) => `
+    <div class="player-row">
+      <span class="pos-badge" style="background:var(--gold-bg);color:var(--gold);min-width:28px">🏈</span>
+      <span class="pname">${name}</span>
+      <button class="del-btn" onclick="removePlaybookPlay(${i})">✕</button>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:0.82rem;padding:8px">Žádné hry v playbooku</div>';
+}
+
+// ═══════════════ STATS PAGE ═══════════════
+let statsTeam = 'A';
+let statsSection = 'tymy';
+
+function openStats() {
+  statsTeam = 'A';
+  statsSection = 'tymy';
+  document.getElementById('stats-page').style.display = 'flex';
+  document.getElementById('spage-tab-a').className = 'stats-team-btn active';
+  document.getElementById('spage-tab-b').className = 'stats-team-btn';
+  ['tymy','hraci','plays'].forEach(s => {
+    document.getElementById('stab-'+s).className = 'stats-section-tab' + (s===statsSection?' active':'');
+  });
+  renderStatsPage();
+}
+
+function closeStats() {
+  document.getElementById('stats-page').style.display = 'none';
+}
+
+function switchStatsTeam(t) {
+  statsTeam = t;
+  document.getElementById('spage-tab-a').className = 'stats-team-btn' + (t==='A'?' active':'');
+  document.getElementById('spage-tab-b').className = 'stats-team-btn' + (t==='B'?' active':'');
+  renderStatsPage();
+}
+
+function switchStatsSection(s) {
+  statsSection = s;
+  ['tymy','hraci','plays'].forEach(id => {
+    document.getElementById('stab-'+id).className = 'stats-section-tab' + (id===s?' active':'');
+  });
+  renderStatsPage();
+}
+
+function getTeamStats(teamKey) {
+  const team = state.teams[teamKey];
+  const teamName = team.name;
+  const oppKey = teamKey === 'A' ? 'B' : 'A';
+  const oppName = state.teams[oppKey].name;
+
+  const OFF_BADGES = ['run','run_td','pass','pass_td','sack'];
+  const offPlays = state.playLog.filter(p => p.teamName === teamName && OFF_BADGES.includes(p.badge));
+  const defPlays = state.playLog.filter(p => p.teamName !== teamName && p.teamName !== '' && OFF_BADGES.includes(p.badge));
+
+  // Yardage
+  let passYds = 0, rushYds = 0;
+  offPlays.forEach(p => {
+    if (['pass','pass_td'].includes(p.badge)) {
+      const m = p.desc.match(/\+(\d+) yd/);
+      if (m) passYds += parseInt(m[1]);
+    }
+    if (['run','run_td'].includes(p.badge)) {
+      const m = p.desc.match(/([+-]?\d+) yd/);
+      if (m) rushYds += parseInt(m[1]);
+    }
+  });
+
+  // Def yardage allowed
+  let defPassYds = 0, defRushYds = 0;
+  defPlays.forEach(p => {
+    if (['pass','pass_td'].includes(p.badge)) { const m = p.desc.match(/\+(\d+) yd/); if(m) defPassYds += parseInt(m[1]); }
+    if (['run','run_td'].includes(p.badge))   { const m = p.desc.match(/([+-]?\d+) yd/); if(m) defRushYds += parseInt(m[1]); }
+  });
+
+  // Hry counts
+  const offCount = offPlays.length;
+  const defCount = defPlays.length;
+  const offAvg = offCount > 0 ? ((passYds + rushYds) / offCount).toFixed(1) : '0.0';
+  const defAvg = defCount > 0 ? ((defPassYds + defRushYds) / defCount).toFixed(1) : '0.0';
+
+  // Drives — OFF drives = this team's drives, DEF drives = opponent's drives
+  const offDrives = state.drives.filter(d => d.team === teamKey);
+  const defDrives = state.drives.filter(d => d.team === oppKey);
+  const offTDs = offDrives.filter(d => d.result === 'td').length;
+  const defTDs = defDrives.filter(d => d.result === 'td').length; // opponent TDs = def failures
+  const defStopped = defDrives.filter(d => d.result !== 'td').length; // def success = stopped drives
+
+  // XP — OFF: how many we scored, DEF: how many we stopped
+  const offXP1drives = state.drives.filter(d => d.team === teamKey && d.xpAttempted === 1);
+  const offXP2drives = state.drives.filter(d => d.team === teamKey && d.xpAttempted === 2);
+  const defXP1drives = state.drives.filter(d => d.team === oppKey && d.xpAttempted === 1);
+  const defXP2drives = state.drives.filter(d => d.team === oppKey && d.xpAttempted === 2);
+
+  // Penalties
+  const penPlays = state.playLog.filter(p => p.teamName === teamName && p.badge === 'penalty');
+  let penYds = 0;
+  penPlays.forEach(p => { const m = p.desc.match(/([+-]?\d+) yd/); if(m) penYds += Math.abs(parseInt(m[1])); });
+
+  return {
+    team, teamName, oppName,
+    passYds, rushYds, totalYds: passYds + rushYds,
+    defPassYds, defRushYds, defTotalYds: defPassYds + defRushYds,
+    offCount, defCount, offAvg, defAvg,
+    offDrives, defDrives, offTDs, defTDs, defStopped,
+    offXP1drives, offXP2drives, defXP1drives, defXP2drives,
+    penPlays: penPlays.length, penYds
+  };
+}
+
+function statCard(title, content) {
+  return `<div class="stat-card"><div class="stat-card-title">${title}</div>${content}</div>`;
+}
+
+function heroRow(items) {
+  return `<div class="stat-hero-row">${items.map(([val, lbl, cls]) =>
+    `<div class="stat-hero-item"><div class="stat-hero-val${cls?' '+cls:''}">${val}</div><div class="stat-hero-label">${lbl}</div></div>`
+  ).join('')}</div>`;
+}
+
+function twoColRow(label, offVal, defVal, offLbl='OFF', defLbl='DEF') {
+  return `<div class="two-col-row">
+    <div class="two-col-label">${label}</div>
+    <div class="two-col-vals">
+      <div class="two-col-val"><div class="tcv-num">${offVal}</div><div class="tcv-lbl">${offLbl}</div></div>
+      <div class="two-col-val"><div class="tcv-num">${defVal}</div><div class="tcv-lbl">${defLbl}</div></div>
+    </div>
+  </div>`;
+}
+
+function renderStatsPage() {
+  const st = getTeamStats(statsTeam);
+  document.getElementById('stats-header-title').textContent = st.teamName;
+  let html = '';
+
+  if (statsSection === 'tymy') {
+    // YARDY
+    html += statCard('Yardy', `
+      ${heroRow([
+        [st.totalYds, 'Celkem', 'green'],
+        [st.passYds, 'Passing', ''],
+        [st.rushYds, 'Rushing', '']
+      ])}
+      <div class="stat-divider">Dovoleno soupeři</div>
+      ${heroRow([
+        [st.defTotalYds, 'Celkem', 'red'],
+        [st.defPassYds, 'Pass', ''],
+        [st.defRushYds, 'Rush', '']
+      ])}
+    `);
+
+    // HRY
+    html += statCard('Hry', `
+      <div class="two-col-header"><span></span><span class="tch">OFF</span><span class="tch">DEF</span></div>
+      ${twoColRow('Počet hrají', st.offCount, st.defCount)}
+      ${twoColRow('Celkem yardů', st.passYds + st.rushYds, st.defTotalYds)}
+      ${twoColRow('Průměr / hra', st.offAvg + ' yd', st.defAvg + ' yd')}
+    `);
+
+    // DRIVE
+    html += statCard('Drive', `
+      <div class="two-col-header"><span></span><span class="tch">OFF</span><span class="tch">DEF</span></div>
+      ${twoColRow('Celkem drivů', st.offDrives.length, st.defDrives.length)}
+      ${twoColRow('Úspěšné (TD)', st.offTDs, st.defStopped, 'Skórováno', 'Ubráněno')}
+    `);
+
+    // XP ÚSPĚŠNOST
+    html += statCard('Úspěšnost potvrzení', `
+      <div class="two-col-header"><span></span><span class="tch">OFF</span><span class="tch">DEF</span></div>
+      ${twoColRow('1PT pokusy',
+        st.offXP1drives.length > 0 ? `${st.offXP1drives.filter(d=>d.xpScored===1).length}/${st.offXP1drives.length}` : '—',
+        st.defXP1drives.length > 0 ? `${st.defXP1drives.filter(d=>d.xpScored===0).length}/${st.defXP1drives.length}` : '—',
+        'Dáno', 'Ubráněno'
+      )}
+      ${twoColRow('2PT pokusy',
+        st.offXP2drives.length > 0 ? `${st.offXP2drives.filter(d=>d.xpScored===2).length}/${st.offXP2drives.length}` : '—',
+        st.defXP2drives.length > 0 ? `${st.defXP2drives.filter(d=>d.xpScored===0).length}/${st.defXP2drives.length}` : '—',
+        'Dáno', 'Ubráněno'
+      )}
+    `);
+
+    // FAULY
+    html += statCard('Fauly', `
+      ${heroRow([
+        [st.penPlays, 'Počet faulů', ''],
+        [st.penYds + ' yd', 'Celkem yardů', 'red'],
+      ])}
+    `);
+
+  } else if (statsSection === 'hraci') {
+    const teamName = st.teamName;
+    const teamKey = statsTeam;
+    const defKey = teamKey === 'A' ? 'B' : 'A';
+    const defTeamName = state.teams[defKey].name;
+    const allPlays = state.playLog;
+    const teamPlays = allPlays.filter(p => p.teamName === teamName);
+    const oppPlays  = allPlays.filter(p => p.teamName === defTeamName);
+
+    // ── Build QB stats ──
+    const qbStats = {};
+    teamPlays.forEach(p => {
+      if (!['pass','pass_td'].includes(p.badge)) return;
+      const qb = p.qb || p.desc.match(/^(.+?) →/)?.[1] || p.desc.match(/^(.+?) INT/)?.[1];
+      if (!qb) return;
+      if (!qbStats[qb]) qbStats[qb] = {att:0, comp:0, yds:0, int:0, td:0, sack:0};
+      qbStats[qb].att++;
+      const isChyceno = p.desc.includes('+') && p.desc.includes('→');
+      if (isChyceno) {
+        qbStats[qb].comp++;
+        const ydM = p.desc.match(/\+(\d+) yd/);
+        if (ydM) qbStats[qb].yds += parseInt(ydM[1]);
+      }
+      if (p.isTD) qbStats[qb].td++;
+      if (p.desc.includes('INT')) qbStats[qb].int++;
+    });
+    // Sacks suffered
+    teamPlays.forEach(p => {
+      if (p.badge !== 'sack') return;
+      const m = p.desc.match(/^(.+?) sack/);
+      if (!m) return;
+      if (!qbStats[m[1]]) qbStats[m[1]] = {att:0,comp:0,yds:0,int:0,td:0,sack:0};
+      qbStats[m[1]].sack++;
+    });
+
+    // ── Build WR stats ──
+    const wrStats = {};
+    teamPlays.forEach(p => {
+      if (!['pass','pass_td'].includes(p.badge)) return;
+      const isChyceno = p.desc.includes('+') && p.desc.includes('→');
+      const isNekompletni = p.desc.includes('nekompletní');
+      const wr = p.wr || p.desc.match(/→ (.+?)(?:\s+\+|\s+nekompletní)/)?.[1];
+      if (!wr) return;
+      if (!wrStats[wr]) wrStats[wr] = {targets:0, rec:0, yds:0, td:0, xp:0, xpPts:0};
+      wrStats[wr].targets++;
+      if (isChyceno) {
+        wrStats[wr].rec++;
+        const ydM = p.desc.match(/\+(\d+) yd/);
+        if (ydM) wrStats[wr].yds += parseInt(ydM[1]);
+      }
+      if (p.isTD) wrStats[wr].td++;
+    });
+    // Run TDs — runner gets TD credit
+    teamPlays.forEach(p => {
+      if (p.badge !== 'run_td') return;
+      const runner = p.runner || p.desc.match(/^(.+?) run/)?.[1];
+      if (!runner) return;
+      if (!wrStats[runner]) wrStats[runner] = {targets:0, rec:0, yds:0, td:0, xp:0, xpPts:0};
+      wrStats[runner].td++;
+      wrStats[runner].rec++;
+      const ydM = p.desc.match(/([+-]?\d+) yd/);
+      if (ydM) wrStats[runner].yds += parseInt(ydM[1]);
+    });
+    // Rush plays (non-TD)
+    teamPlays.forEach(p => {
+      if (p.badge !== 'run') return;
+      const runner = p.runner || p.desc.match(/^(.+?) run/)?.[1];
+      if (!runner) return;
+      if (!wrStats[runner]) wrStats[runner] = {targets:0, rec:0, yds:0, td:0, xp:0, xpPts:0};
+      wrStats[runner].rec++;
+      const ydM = p.desc.match(/([+-]?\d+) yd/);
+      if (ydM) wrStats[runner].yds += parseInt(ydM[1]);
+    });
+    // XP potvrzení
+    allPlays.filter(p=>['xp1','xp2'].includes(p.badge) && p.teamName===teamName).forEach(p => {
+      const m = p.desc.match(/→ (.+?)(?:\s·|\s✓|\s✗|$)/);
+      if (m) {
+        const wr = m[1].trim();
+        if (!wrStats[wr]) wrStats[wr] = {targets:0, rec:0, yds:0, td:0, xp:0, xpPts:0};
+        wrStats[wr].xp++;
+        wrStats[wr].xpPts += p.badge==='xp1' ? 1 : 2;
+      }
+    });
+
+    // ── Build DB (DEF) stats — DBs from this team's defense ──
+    const dbStats = {};
+    // Flag pulls and strip — on opponent plays with defPlayer from this team
+    oppPlays.forEach(p => {
+      if (!['run','pass'].includes(p.badge)) return;
+      const defM = p.desc.match(/· ([^·\[]+?)(?:\s*\[|$)/);
+      if (!defM) return;
+      const defender = defM[1].trim();
+      // Check if this player belongs to our team
+      const isOurPlayer = state.teams[teamKey].players.some(pl => pl.name === defender);
+      if (!isOurPlayer) return;
+      if (!dbStats[defender]) dbStats[defender] = {flagPull:0, sack:0, brkup:0, int:0};
+      if (p.desc.includes('Flag Pull')) dbStats[defender].flagPull++;
+      if (p.desc.includes('Sražený balón')) dbStats[defender].brkup++;
+    });
+    // Sacks by our defenders
+    oppPlays.forEach(p => {
+      if (p.badge !== 'sack') return;
+      const m = p.desc.match(/· (.+?)(?:\s*\[|$)/);
+      if (!m) return;
+      const defender = m[1].trim();
+      const isOurPlayer = state.teams[teamKey].players.some(pl => pl.name === defender);
+      if (!isOurPlayer) return;
+      if (!dbStats[defender]) dbStats[defender] = {flagPull:0, sack:0, brkup:0, int:0};
+      dbStats[defender].sack++;
+    });
+    // INTs by our DBs
+    oppPlays.forEach(p => {
+      if (p.badge !== 'pass') return;
+      if (!p.desc.includes('INT')) return;
+      const m = p.desc.match(/zachytil (.+?)\s*\(/);
+      if (!m) return;
+      const defender = m[1].trim();
+      const isOurPlayer = state.teams[teamKey].players.some(pl => pl.name === defender);
+      if (!isOurPlayer) return;
+      if (!dbStats[defender]) dbStats[defender] = {flagPull:0, sack:0, brkup:0, int:0};
+      dbStats[defender].int++;
+    });
+
+    // ── Render ──
+    if (Object.keys(qbStats).length) {
+      html += statCard('QB', Object.entries(qbStats).map(([n,s]) => {
+        const cmp = s.att > 0 ? Math.round(s.comp/s.att*100) : 0;
+        return `<div class="stat-player-row">
+          <div class="stat-player-name">${n}</div>
+          <div class="stat-player-nums">
+            <div class="stat-num"><div class="val">${s.comp}/${s.att}</div><div class="lbl">COMP</div></div>
+            <div class="stat-num"><div class="val">${cmp}%</div><div class="lbl">CMP%</div></div>
+            <div class="stat-num"><div class="val">${s.yds}</div><div class="lbl">YDS</div></div>
+            <div class="stat-num"><div class="val">${s.td}</div><div class="lbl">TD</div></div>
+            <div class="stat-num"><div class="val">${s.int}</div><div class="lbl">INT</div></div>
+            <div class="stat-num"><div class="val">${s.sack}</div><div class="lbl">SACK</div></div>
+          </div></div>`;
+      }).join(''));
+    }
+
+    if (Object.keys(wrStats).length) {
+      html += statCard('WR', Object.entries(wrStats).sort((a,b)=>b[1].yds-a[1].yds).map(([n,s]) => {
+        const totalPts = s.td * 6 + s.xpPts;
+        return `<div class="stat-player-row">
+          <div class="stat-player-name">${n}</div>
+          <div class="stat-player-nums">
+            <div class="stat-num"><div class="val">${s.rec}/${s.targets}</div><div class="lbl">REC</div></div>
+            <div class="stat-num"><div class="val">${s.yds}</div><div class="lbl">YDS</div></div>
+            <div class="stat-num"><div class="val">${s.td}</div><div class="lbl">TD</div></div>
+            <div class="stat-num"><div class="val">${s.xp}</div><div class="lbl">XP</div></div>
+            <div class="stat-num"><div class="val">${totalPts}</div><div class="lbl">PTS</div></div>
+          </div></div>`;
+      }).join(''));
+    }
+
+    if (Object.keys(dbStats).length) {
+      html += statCard('DB (Obrana)', Object.entries(dbStats).map(([n,s]) =>
+        `<div class="stat-player-row">
+          <div class="stat-player-name">${n}</div>
+          <div class="stat-player-nums">
+            <div class="stat-num"><div class="val">${s.flagPull}</div><div class="lbl">FLAG</div></div>
+            <div class="stat-num"><div class="val">${s.sack}</div><div class="lbl">SACK</div></div>
+            <div class="stat-num"><div class="val">${s.brkup}</div><div class="lbl">BRKUP</div></div>
+            <div class="stat-num"><div class="val">${s.int}</div><div class="lbl">INT</div></div>
+          </div></div>`
+      ).join(''));
+    }
+
+    if (!Object.keys(qbStats).length && !Object.keys(wrStats).length && !Object.keys(dbStats).length)
+      html += `<div class="stat-empty">Zatím žádné statistiky hráčů</div>`;
+
+  } else if (statsSection === 'plays') {
+    const teamPlays = state.playLog.filter(p => p.teamName === st.teamName);
+    const passCount = teamPlays.filter(p=>['pass','pass_td'].includes(p.badge)).length;
+    const runCount  = teamPlays.filter(p=>['run','run_td'].includes(p.badge)).length;
+    const sackCount = teamPlays.filter(p=>p.badge==='sack').length;
+    const total = passCount + runCount + sackCount;
+    const pct = n => total > 0 ? Math.round(n/total*100) : 0;
+
+    // ── Down distribution ──
+    // Extract down from downStr e.g. "1. down · ..."
+    const ydsFromDesc = (p) => {
+      if (p.badge==='run') { const m=p.desc.match(/([+-]?\d+) yd/); return m?parseInt(m[1]):null; }
+      if (p.badge==='pass') { const m=p.desc.match(/\+(\d+) yd/); return m?parseInt(m[1]):null; }
+      if (p.badge==='sack') { const m=p.desc.match(/(-\d+) yd/); return m?parseInt(m[1]):null; }
+      return null;
+    };
+    const downData = {1:{S:0,M:0,L:0,tot:0}, 2:{S:0,M:0,L:0,tot:0}, 3:{S:0,M:0,L:0,tot:0}, 4:{S:0,M:0,L:0,tot:0}};
+    teamPlays.forEach(p => {
+      if (!['run','run_td','pass','pass_td','sack'].includes(p.badge)) return;
+      const dm = p.downStr.match(/^(\d)\./);
+      if (!dm) return;
+      const down = parseInt(dm[1]);
+      if (down < 1 || down > 4) return;
+      const yds = ydsFromDesc(p);
+      if (yds === null) return;
+      downData[down].tot++;
+      if (yds <= 7) downData[down].S++;
+      else if (yds <= 15) downData[down].M++;
+      else downData[down].L++;
+    });
+
+    const downChart = [1,2,3,4].map(d => {
+      const dd = downData[d];
+      const t = dd.tot || 1;
+      const sW = Math.round(dd.S/t*100);
+      const mW = Math.round(dd.M/t*100);
+      const lW = Math.round(dd.L/t*100);
+      return `<div class="down-row">
+        <div class="down-row-label">${d}. DOWN<br><small style="font-weight:500;color:var(--text3)">${dd.tot} hrají</small></div>
+        <div class="down-bar-wrap">
+          <div class="down-bar">
+            <div class="down-seg short"  style="width:${sW}%" title="Short ${dd.S}"></div>
+            <div class="down-seg middle" style="width:${mW}%" title="Middle ${dd.M}"></div>
+            <div class="down-seg long"   style="width:${lW}%" title="Long ${dd.L}"></div>
+          </div>
+          <div class="down-bar-nums">
+            <span class="dbn short">S ${dd.S}</span>
+            <span class="dbn middle">M ${dd.M}</span>
+            <span class="dbn long">L ${dd.L}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    html += statCard('Down distribuce &nbsp;<span style="font-size:0.65rem;font-weight:500;color:var(--text3)">■ Short 0–7 ■ Middle 8–15 ■ Long 16+</span>', downChart);
+
+    // ── Play type split ──
+    html += statCard('Rozdělení plays', `
+      <div class="play-bar-row"><div class="play-bar-label">Pass</div>
+        <div class="play-bar-track"><div class="play-bar-fill" style="width:${pct(passCount)}%;background:var(--green)"></div></div>
+        <div class="play-bar-pct">${pct(passCount)}%</div></div>
+      <div class="play-bar-row"><div class="play-bar-label">Rush</div>
+        <div class="play-bar-track"><div class="play-bar-fill" style="width:${pct(runCount)}%;background:var(--blue)"></div></div>
+        <div class="play-bar-pct">${pct(runCount)}%</div></div>
+      <div class="play-bar-row"><div class="play-bar-label">Sack</div>
+        <div class="play-bar-track"><div class="play-bar-fill" style="width:${pct(sackCount)}%;background:var(--red)"></div></div>
+        <div class="play-bar-pct">${pct(sackCount)}%</div></div>
+    `);
+
+    // ── Named plays (Team A only) ──
+    if (statsTeam === 'A' && state.playbook.length > 0) {
+      // Count by play name × down
+      const playNameStats = {}; // name -> { total, byDown: {1,2,3,4} }
+      teamPlays.forEach(p => {
+        if (!['run','pass','sack'].includes(p.badge)) return;
+        const nm = p.desc.match(/\[(.+?)\]/);
+        if (!nm) return;
+        const name = nm[1];
+        if (!playNameStats[name]) playNameStats[name] = { total:0, byDown:{1:0,2:0,3:0,4:0} };
+        playNameStats[name].total++;
+        const dm = p.downStr.match(/^(\d)\./);
+        if (dm) { const d = parseInt(dm[1]); if(d>=1&&d<=4) playNameStats[name].byDown[d]++; }
+      });
+
+      if (Object.keys(playNameStats).length) {
+        const maxTotal = Math.max(...Object.values(playNameStats).map(s=>s.total));
+        const rows = Object.entries(playNameStats)
+          .sort((a,b)=>b[1].total-a[1].total)
+          .map(([name,s]) => {
+            const w = Math.round(s.total/maxTotal*100);
+            return `<div class="play-name-row">
+              <div class="pnr-top">
+                <span class="pnr-name">${name}</span>
+                <span class="pnr-total">${s.total}×</span>
+              </div>
+              <div class="play-bar-track" style="margin:4px 0 3px">
+                <div class="play-bar-fill" style="width:${w}%;background:var(--blue)"></div>
+              </div>
+              <div class="pnr-downs">
+                ${[1,2,3,4].map(d=>`<span class="pnr-d ${s.byDown[d]>0?'active':''}">${d}D: ${s.byDown[d]}</span>`).join('')}
+              </div>
+            </div>`;
+          }).join('');
+        html += statCard('Nejčastější hry', rows);
+      }
+
+      // ── XP plays ──
+      const xp1plays = {}, xp2plays = {};
+      state.playLog.forEach(p => {
+        if (p.teamName !== st.teamName) return;
+        if (!['run','pass','sack'].includes(p.badge)) return;
+        const nm = p.desc.match(/\[(.+?)\]/);
+        if (!nm) return;
+        // Look for next entry that is xp1 or xp2
+        // We tag plays by badge xp1/xp2 in playLog right after TD
+        // Instead: check if this play is in awaitingExtraPoint context
+        // Better: tag at confirm time — we store xpContext in the play entry
+      });
+
+      // XP plays: look for plays tagged with xpContext
+      const xp1rows = state.playLog.filter(p=>p.xpPts===1 && p.teamName===st.teamName);
+      const xp2rows = state.playLog.filter(p=>p.xpPts===2 && p.teamName===st.teamName);
+      const xpCount = (arr) => {
+        const cnt = {};
+        arr.forEach(p=>{ const nm=p.desc.match(/\[(.+?)\]/); if(nm){cnt[nm[1]]=(cnt[nm[1]]||0)+1;} });
+        return cnt;
+      };
+      const xp1cnt = xpCount(xp1rows);
+      const xp2cnt = xpCount(xp2rows);
+      if (Object.keys(xp1cnt).length || Object.keys(xp2cnt).length) {
+        const xpRows = (cnt, label) => Object.entries(cnt).sort((a,b)=>b[1]-a[1])
+          .map(([n,c])=>`<div class="stat-player-row"><div class="stat-player-name">${n}</div>
+            <div class="stat-player-nums"><div class="stat-num"><div class="val">${c}×</div><div class="lbl">${label}</div></div></div></div>`).join('');
+        html += statCard('Hry na potvrzení', `${xpRows(xp1cnt,'1PT')}${xpRows(xp2cnt,'2PT')}`);
+      }
+    }
+
+    if (total === 0) html += `<div class="stat-empty">Zatím žádné plays</div>`;
+  }
+
+  if (statsSection === 'tymy') {
+    html += renderStatsActions();
+  }
+
+  document.getElementById('stats-page-content').innerHTML = html;
+  if (statsSection === 'tymy') loadSettingsFromStorage();
+}
+
+// ═══════════════ LOCALSTORAGE ═══════════════
+const LS_PLAYERS  = 'ff_players_v1';     // legacy (jen pro migraci)
+const LS_PLAYBOOK = 'ff_playbook_v1';    // legacy (jen pro migraci)
+const LS_SETTINGS = 'ff_settings_v1';
+const LS_PROFILES = 'ff_profiles_v1';    // nové: { profiles: { [name]: {players, playbook} }, active: 'name' }
+const LS_OPPONENT = 'ff_opponent_v1';    // soupeř (název + hráči) — odděleně od profilu, mění se per zápas
+
+// ── Profile helpers ──────────────────────────────────────────────────────
+function getProfilesData() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(LS_PROFILES));
+    if (raw && raw.profiles && raw.active) return raw;
+  } catch(e) {}
+  return null;
+}
+function writeProfilesData(data) {
+  localStorage.setItem(LS_PROFILES, JSON.stringify(data));
+}
+function snapshotActiveProfile() {
+  return {
+    name: state.teams.A.name,
+    players: state.teams.A.players.slice(),
+    playbook: state.playbook.slice()
+  };
+}
+function applyProfileToState(profile) {
+  state.teams.A.name    = profile.name || 'Tým';
+  state.teams.A.players = (profile.players || []).slice();
+  state.playbook        = (profile.playbook || []).slice();
+}
+function persistActiveProfile() {
+  const data = getProfilesData();
+  if (!data) return;
+  data.profiles[data.active] = snapshotActiveProfile();
+  writeProfilesData(data);
+}
+function persistOpponent() {
+  localStorage.setItem(LS_OPPONENT, JSON.stringify({
+    name: state.teams.B.name,
+    players: state.teams.B.players
+  }));
+}
+
+function switchProfile(name) {
+  const data = getProfilesData();
+  if (!data || !data.profiles[name]) return;
+  // Save current first (zachytí všechny změny od posledního persistu)
+  data.profiles[data.active] = snapshotActiveProfile();
+  // Apply new
+  applyProfileToState(data.profiles[name]);
+  data.active = name;
+  writeProfilesData(data);
+  // Upda
