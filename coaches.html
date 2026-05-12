@@ -386,7 +386,7 @@ function aggregateForScope() {
   const m = DATA.matchLog.find(x => String(x.idx) === String(SCOPE));
   if (!m) return DATA.totals;
 
-  // Single-match struktura kompatibilní s totals
+  // Single-match struktura kompatibilní s totals (vč. Phase 2)
   return {
     matches: 1,
     off: {
@@ -406,8 +406,13 @@ function aggregateForScope() {
       drives: m.defDrives,
       stops: m.defStops,
       stopPct: m.stopPct,
+      rushYds: m.oppRushYds || 0,
+      passYds: m.oppPassYds || 0,
+      totalYds: m.oppTotalYds || 0,
     },
-    fauly: { count: m.penCount, yds: m.penYds }
+    fauly: { count: m.penCount, yds: m.penYds },
+    downDist: m.downDist || { 1:0, 2:0, 3:0, 4:0 },
+    playbookAkce: m.playbookAkce || []
   };
 }
 
@@ -493,16 +498,68 @@ function renderOff(s) {
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title"><h3>Down distribuce</h3><span class="meta">per-play data</span></div>
-      <div class="coming-soon">⏳ Vyžaduje per-play data — připravujeme v Phase 2 (úprava aplikace, ukládání jednotlivých plays do nového listu).</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><h3>Playbook akce</h3><span class="meta">úspěšnost per akce</span></div>
-      <div class="coming-soon">⏳ Vyžaduje per-play data s názvem akce — připravujeme v Phase 2.</div>
-    </div>
+    ${renderDownDist(s.downDist)}
+    ${renderPlaybook(s.playbookAkce)}
   `;
+}
+
+function renderDownDist(dd) {
+  if (!dd) return '';
+  const total = (dd[1]||0) + (dd[2]||0) + (dd[3]||0) + (dd[4]||0);
+  if (total === 0) {
+    return `
+      <div class="card">
+        <div class="card-title"><h3>Down distribuce</h3><span class="meta">útočné plays</span></div>
+        <div class="empty">Zatím žádná per-play data v této sezóně. Po novém uložení zápasu se začnou plnit.</div>
+      </div>`;
+  }
+  // Bar chart per down (1st, 2nd, 3rd, 4th)
+  const max = Math.max(1, dd[1]||0, dd[2]||0, dd[3]||0, dd[4]||0);
+  const rows = [1, 2, 3, 4].map(d => {
+    const c = dd[d] || 0;
+    const pct = total ? Math.round(c/total*100) : 0;
+    return `
+      <div class="bar-row">
+        <span class="label">${d}. down <span style="color:var(--text-subtle);font-weight:400;margin-left:4px">${pct}%</span></span>
+        <span class="bar-vis">
+          <span class="bar-wrap"><span class="bar" style="width:${(c/max*100).toFixed(0)}%"></span></span>
+          <span class="bar-val">${c}</span>
+        </span>
+      </div>`;
+  }).join('');
+  return `
+    <div class="card">
+      <div class="card-title"><h3>Down distribuce</h3><span class="meta">${total} útočných plays</span></div>
+      ${rows}
+    </div>`;
+}
+
+function renderPlaybook(akce) {
+  if (!akce || akce.length === 0) {
+    return `
+      <div class="card">
+        <div class="card-title"><h3>Playbook akce</h3><span class="meta">úspěšnost per akce</span></div>
+        <div class="empty">Zatím žádné pojmenované akce z playbooku.<br>
+          <small style="color:var(--text-subtle)">V aplikaci pojmenuj akce v poli "Název hry" — pak se tu agregují.</small>
+        </div>
+      </div>`;
+  }
+  const max = Math.max(1, ...akce.map(a => a.count));
+  const rows = akce.map(a => `
+    <div class="bar-row">
+      <span class="label">${escapeHTML(a.name)}
+        <span style="color:var(--text-subtle);font-weight:400;margin-left:6px">${a.totalYds} yd · avg ${a.avgYds}${a.td ? ' · ' + a.td + ' TD' : ''}</span>
+      </span>
+      <span class="bar-vis">
+        <span class="bar-wrap"><span class="bar" style="width:${(a.count/max*100).toFixed(0)}%"></span></span>
+        <span class="bar-val">${a.count}×</span>
+      </span>
+    </div>`).join('');
+  return `
+    <div class="card">
+      <div class="card-title"><h3>Playbook akce</h3><span class="meta">${akce.length} různých akcí</span></div>
+      ${rows}
+    </div>`;
 }
 
 // ============================================================
@@ -511,6 +568,7 @@ function renderOff(s) {
 function renderDef(s) {
   const d = s.def;
   const scopeLabel = SCOPE === 'all' ? 'celá sezóna' : 'v zápase';
+  const oppRush = d.rushYds || 0, oppPass = d.passYds || 0, oppTotal = d.totalYds || 0;
   return `
     <div class="row metrics-4">
       <div class="metric accent">
@@ -520,18 +578,18 @@ function renderDef(s) {
       </div>
       <div class="metric">
         <div class="lbl">Rush yardů soupeře</div>
-        <div class="val">—</div>
-        <div class="sub">v Phase 2</div>
+        <div class="val">${oppRush}</div>
+        <div class="sub">naběhal proti nám</div>
       </div>
       <div class="metric">
         <div class="lbl">Pass yardů soupeře</div>
-        <div class="val">—</div>
-        <div class="sub">v Phase 2</div>
+        <div class="val">${oppPass}</div>
+        <div class="sub">napasoval proti nám</div>
       </div>
       <div class="metric accent">
         <div class="lbl">Celkem yardů soupeře</div>
-        <div class="val">—</div>
-        <div class="sub">v Phase 2</div>
+        <div class="val">${oppTotal}</div>
+        <div class="sub">${scopeLabel}</div>
       </div>
     </div>
 
@@ -559,27 +617,28 @@ function renderDef(s) {
 
     <div class="row metrics-3">
       <div class="metric">
-        <div class="lbl">Soupeřova 1PT</div>
-        <div class="val">—</div>
-        <div class="sub">v Phase 2</div>
-      </div>
-      <div class="metric">
-        <div class="lbl">Soupeřova 2PT</div>
-        <div class="val">—</div>
-        <div class="sub">v Phase 2</div>
-      </div>
-      <div class="metric">
         <div class="lbl">Body proti / drive</div>
         <div class="val">${d.drives ? Math.round(d.pointsAgainst/d.drives*10)/10 : 0}</div>
         <div class="sub">průměr</div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="coming-soon">
-        ⏳ Soupeřovy yardy a conversion vyžadují tracking opponent driveů přímo v aplikaci (zaznamenávat soupeřovy plays na obraně). To je úkol pro Phase 2.
+      <div class="metric">
+        <div class="lbl">Yardů soupeře / drive</div>
+        <div class="val">${d.drives ? Math.round(oppTotal/d.drives*10)/10 : 0}</div>
+        <div class="sub">průměr</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Soupeřova konverze</div>
+        <div class="val">—</div>
+        <div class="sub">vyžaduje opp XP wizard</div>
       </div>
     </div>
+
+    ${oppTotal === 0 && d.drives > 0 ? `
+      <div class="card">
+        <div class="coming-soon">
+          ℹ Soupeřovy yardy se počítají z plays kde byl soupeř na útoku. Pokud vidíš 0, tak appka ještě tyto play data neukládá — uložte další zápas po Phase 2 update.
+        </div>
+      </div>` : ''}
   `;
 }
 
