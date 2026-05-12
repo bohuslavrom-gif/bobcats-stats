@@ -23,7 +23,6 @@
   --radius: 12px;
   --radius-sm: 8px;
 }
-
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
@@ -36,6 +35,7 @@ body {
 }
 .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
 
+/* ── HERO ──────────────────────────────────────────────────────────────── */
 .hero {
   background: var(--black);
   color: #fff;
@@ -59,23 +59,65 @@ body {
 .hero .meta-line { font-size: 11px; color: rgba(255, 255, 255, 0.65); margin-top: 4px; letter-spacing: 0.1em; text-transform: uppercase; }
 .hero .right { display: flex; align-items: center; gap: 12px; }
 .hero select {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.08); color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 8px 30px 8px 12px;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
+  padding: 8px 30px 8px 12px; border-radius: var(--radius-sm);
+  font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='white' d='M0 0l5 6 5-6z'/></svg>");
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
 
+/* ── CONTROLS BAR (period + side tabs) ────────────────────────────────── */
+.controls {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tabs {
+  display: inline-flex;
+  background: var(--surface-alt);
+  border-radius: 8px;
+  padding: 3px;
+}
+.tab {
+  border: 0; background: transparent;
+  padding: 7px 18px;
+  border-radius: 6px;
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab:hover { color: var(--text); }
+.tab.active { background: var(--red); color: #fff; }
+.scope { display: flex; align-items: center; gap: 8px; }
+.scope label { font-size: 11px; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
+.scope select {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 7px 30px 7px 12px;
+  border-radius: 6px;
+  font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%231A1A1A' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* ── METRIC CARDS ─────────────────────────────────────────────────────── */
 .row { display: grid; gap: 12px; }
-.metrics { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 16px; }
+.metrics-3 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 16px; }
+.metrics-4 { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 16px; }
 .metric {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -88,15 +130,22 @@ body {
 .metric .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .metric .val {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px; font-weight: 400;
+  font-size: 30px; font-weight: 400;
   margin-top: 2px; font-variant-numeric: tabular-nums;
   line-height: 1.05; letter-spacing: 0.02em;
 }
 .metric .sub { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+.metric.split .vals {
+  display: flex; gap: 14px; align-items: baseline; margin-top: 2px;
+}
+.metric.split .vals .num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.metric.split .vals .pct { color: var(--red); font-weight: 500; font-size: 14px; }
 
-.grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 16px; }
-@media (min-width: 720px) { .grid2 { grid-template-columns: 1fr 1fr; } }
-
+/* ── CARDS ────────────────────────────────────────────────────────────── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -112,6 +161,7 @@ body {
 }
 .card-title .meta { font-size: 11px; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
 
+/* ── DRIVE RESULTS GRID ──────────────────────────────────────────────── */
 .drv-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
 .drv-result {
   background: var(--surface-alt);
@@ -127,43 +177,32 @@ body {
   font-variant-numeric: tabular-nums; line-height: 1;
 }
 .drv-result .l {
-  font-size: 10px;
-  color: var(--text-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 4px;
+  font-size: 10px; color: var(--text-subtle);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px;
 }
 
+/* ── FIELD ────────────────────────────────────────────────────────────── */
 .field {
-  position: relative;
-  height: 70px;
-  background: var(--surface-alt);
-  border-radius: var(--radius-sm);
-  margin-top: 16px;
-  overflow: hidden;
+  position: relative; height: 70px;
+  background: var(--surface-alt); border-radius: var(--radius-sm);
+  margin-top: 16px; overflow: hidden;
 }
 .field .midline { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.15); }
 .field .endzone-l, .field .endzone-r { position: absolute; top: 0; bottom: 0; width: 10%; background: rgba(220, 31, 38, 0.12); }
 .field .endzone-l { left: 0; }
 .field .endzone-r { right: 0; }
 .field .dot {
-  position: absolute;
-  top: 50%; transform: translate(-50%, -50%);
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--red);
-  opacity: 0.55;
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red); opacity: 0.55;
 }
 .field-cap {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: var(--text-subtle);
-  margin-top: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text-subtle);
+  margin-top: 6px; text-transform: uppercase; letter-spacing: 0.06em;
 }
 
+/* ── BAR ROWS (fauly + playbook akce) ─────────────────────────────────── */
 .bar-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -174,20 +213,13 @@ body {
 }
 .bar-row .label { color: var(--text); }
 .bar-row .label .side {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-left: 6px;
-  padding: 1px 5px;
-  border-radius: 3px;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+  margin-left: 6px; padding: 1px 5px; border-radius: 3px;
 }
 .bar-row .label .side.off { background: var(--red-soft); color: var(--red-dark); }
 .bar-row .label .side.def { background: var(--surface-alt); color: var(--text-muted); }
 .bar-row .label .side.both { background: #E6F1FB; color: #042C53; }
-.bar-vis {
-  display: flex; align-items: center; gap: 8px;
-  width: 180px; max-width: 50vw;
-}
+.bar-vis { display: flex; align-items: center; gap: 8px; width: 180px; max-width: 50vw; }
 .bar-wrap { flex: 1; height: 16px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
 .bar { height: 100%; border-radius: 4px; background: var(--red); }
 .bar.def { background: var(--black); }
@@ -195,23 +227,21 @@ body {
 .bar-val {
   font-variant-numeric: tabular-nums;
   font-weight: 500;
-  width: 30px;
+  min-width: 30px;
   text-align: right;
   color: var(--text-muted);
 }
 
+/* ── TABLE ────────────────────────────────────────────────────────────── */
 .lb table { width: 100%; font-size: 12px; border-collapse: collapse; }
 .lb th {
-  text-align: left;
-  font-weight: 500;
+  text-align: left; font-weight: 500;
   color: var(--text-subtle);
   padding: 8px 6px;
   border-bottom: 1px solid var(--border);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
 }
-.lb td { padding: 10px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.lb td { padding: 10px 6px; border-bottom: 1px solid var(--border); }
 .lb tr:last-child td { border-bottom: none; }
 .lb .num { text-align: right; font-variant-numeric: tabular-nums; }
 .lb .opp { font-weight: 500; }
@@ -240,11 +270,9 @@ body {
 
 .legend-inline {
   display: flex; gap: 16px;
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: 11px; color: var(--text-muted);
   margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  text-transform: uppercase; letter-spacing: 0.06em;
 }
 .legend-inline .swatch {
   display: inline-block;
@@ -254,20 +282,28 @@ body {
   vertical-align: -1px;
 }
 
-.footer {
-  text-align: center;
-  margin-top: 24px;
-  padding: 16px 0;
-  font-size: 11px;
+.coming-soon {
+  font-size: 12px;
   color: var(--text-subtle);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-style: italic;
+  padding: 16px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.footer {
+  text-align: center; margin-top: 24px; padding: 16px 0;
+  font-size: 11px; color: var(--text-subtle);
+  letter-spacing: 0.05em; text-transform: uppercase;
 }
 
 @media (max-width: 480px) {
   .hero { padding: 18px 20px; flex-direction: column; align-items: flex-start; }
   .hero .wordmark { font-size: 32px; }
   .hero .logo { width: 48px; height: 48px; }
+  .controls { flex-direction: column; align-items: stretch; gap: 8px; }
+  .scope { justify-content: space-between; }
   .metric .val { font-size: 26px; }
   .card { padding: 14px 16px; }
   .lb th, .lb td { padding: 6px 4px; font-size: 11px; }
@@ -294,10 +330,7 @@ body {
   </header>
 
   <div id="content">
-    <div class="loading">
-      <div class="spinner"></div>
-      Načítám data…
-    </div>
+    <div class="loading"><div class="spinner"></div>Načítám data…</div>
   </div>
 
   <footer class="footer">Bobcats stats · trenérská sekce</footer>
@@ -329,56 +362,259 @@ function escapeHTML(s) {
   }[c]));
 }
 function escapeAttr(s) { return escapeHTML(s); }
-
+function pct(num, den) { return den > 0 ? Math.round(num/den*100) : 0; }
 function emptyState(msg) {
   return `<div class="card"><div class="empty"><span class="ico">📊</span>${escapeHTML(msg)}</div></div>`;
 }
 
 // ============================================================
-//  Render — coach analytics
+//  STATE
 // ============================================================
-function renderCoach(data, team) {
-  if (!data || !data.team) return emptyState('Pro tento tým zatím nejsou žádná data.');
+let DATA = null;          // celá payload z getCoachStats
+let CURRENT_TEAM = '';
+let SIDE = 'off';         // 'off' | 'def'
+let SCOPE = 'all';        // 'all' | match.idx (string)
 
-  // Metriky nahoře
-  const metricsHTML = `
-    <div class="row metrics">
-      <div class="metric accent"><div class="lbl">Drive eff.</div><div class="val">${data.driveEfficiency}%</div><div class="sub">drives → TD</div></div>
-      <div class="metric"><div class="lbl">Avg drive</div><div class="val">${data.avgPlaysPerDrive}</div><div class="sub">plays / drive</div></div>
-      <div class="metric accent"><div class="lbl">Faulů</div><div class="val">${data.faulyTotal}</div><div class="sub">${data.faulyPerGame} / zápas</div></div>
-      <div class="metric"><div class="lbl">Fauly yardů</div><div class="val">${data.faulyYdsTotal}</div><div class="sub">${data.faulyYdsPerGame} / zápas</div></div>
-    </div>`;
+// ============================================================
+//  AGGREGATE PRO VYBRANÝ SCOPE
+//  Vrací stats objekt pro right side panel.
+// ============================================================
+function aggregateForScope() {
+  if (!DATA) return null;
+  if (SCOPE === 'all') return DATA.totals;
 
-  // Drive výsledky
-  const dr = data.driveResults;
-  const driveTotal = data.driveCount;
-  const drvHTML = driveTotal === 0 ? '' : `
+  const m = DATA.matchLog.find(x => String(x.idx) === String(SCOPE));
+  if (!m) return DATA.totals;
+
+  // Single-match struktura kompatibilní s totals
+  return {
+    matches: 1,
+    off: {
+      points: m.ourScore,
+      pointsAvg: m.ourScore,
+      rushYds: m.rushYds, passYds: m.passYds, totalYds: m.totalYds,
+      drives: m.offDrives, td: m.offTD,
+      driveEffPct: m.tdPct,
+      qbAtt: m.qbAtt, qbComp: m.qbComp, qbYds: m.qbYds, qbTD: m.qbTD, qbINT: m.qbINT,
+      passPct: m.passPct,
+      xp1Att: m.xp1Att, xp1Ok: m.xp1Ok, xp1Pct: m.xp1Pct,
+      xp2Att: m.xp2Att, xp2Ok: m.xp2Ok, xp2Pct: m.xp2Pct,
+    },
+    def: {
+      pointsAgainst: m.oppScore,
+      pointsAvg: m.oppScore,
+      drives: m.defDrives,
+      stops: m.defStops,
+      stopPct: m.stopPct,
+    },
+    fauly: { count: m.penCount, yds: m.penYds }
+  };
+}
+
+// ============================================================
+//  RENDER — OFF panel
+// ============================================================
+function renderOff(s) {
+  const o = s.off;
+  const scopeLabel = SCOPE === 'all' ? 'celá sezóna' : `1 zápas`;
+  return `
+    <div class="row metrics-4">
+      <div class="metric accent">
+        <div class="lbl">Body skórované</div>
+        <div class="val">${o.points}</div>
+        <div class="sub">${SCOPE === 'all' ? o.pointsAvg + ' / zápas' : 'v zápase'}</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Rush yardů</div>
+        <div class="val">${o.rushYds}</div>
+        <div class="sub">naběhané</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Pass yardů</div>
+        <div class="val">${o.passYds}</div>
+        <div class="sub">přihrávkou</div>
+      </div>
+      <div class="metric accent">
+        <div class="lbl">Celkem yardů</div>
+        <div class="val">${o.totalYds}</div>
+        <div class="sub">${scopeLabel}</div>
+      </div>
+    </div>
+
+    <div class="row metrics-3">
+      <div class="metric split">
+        <div class="lbl">Drive úspěšnost</div>
+        <div class="vals">
+          <span class="num">${o.td}</span>
+          <span style="color:var(--text-subtle);font-size:13px">/ ${o.drives}</span>
+          <span class="pct">${o.driveEffPct}%</span>
+        </div>
+        <div class="sub">drives → TD</div>
+      </div>
+      <div class="metric split">
+        <div class="lbl">Pass úspěšnost</div>
+        <div class="vals">
+          <span class="num">${o.qbComp}</span>
+          <span style="color:var(--text-subtle);font-size:13px">/ ${o.qbAtt}</span>
+          <span class="pct">${o.passPct}%</span>
+        </div>
+        <div class="sub">QB COMP / ATT</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Celkem TD</div>
+        <div class="val">${o.td}</div>
+        <div class="sub">touchdownů</div>
+      </div>
+    </div>
+
+    <div class="row metrics-3">
+      <div class="metric split">
+        <div class="lbl">1PT konverze</div>
+        <div class="vals">
+          <span class="num">${o.xp1Ok}</span>
+          <span style="color:var(--text-subtle);font-size:13px">/ ${o.xp1Att}</span>
+          <span class="pct">${o.xp1Pct}%</span>
+        </div>
+        <div class="sub">úspěšné / pokusy</div>
+      </div>
+      <div class="metric split">
+        <div class="lbl">2PT konverze</div>
+        <div class="vals">
+          <span class="num">${o.xp2Ok}</span>
+          <span style="color:var(--text-subtle);font-size:13px">/ ${o.xp2Att}</span>
+          <span class="pct">${o.xp2Pct}%</span>
+        </div>
+        <div class="sub">úspěšné / pokusy</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">QB INT</div>
+        <div class="val">${o.qbINT}</div>
+        <div class="sub">interceptions</div>
+      </div>
+    </div>
+
     <div class="card">
-      <div class="card-title"><h3>Výsledky drive</h3><span class="meta">${driveTotal} drives</span></div>
+      <div class="card-title"><h3>Down distribuce</h3><span class="meta">per-play data</span></div>
+      <div class="coming-soon">⏳ Vyžaduje per-play data — připravujeme v Phase 2 (úprava aplikace, ukládání jednotlivých plays do nového listu).</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h3>Playbook akce</h3><span class="meta">úspěšnost per akce</span></div>
+      <div class="coming-soon">⏳ Vyžaduje per-play data s názvem akce — připravujeme v Phase 2.</div>
+    </div>
+  `;
+}
+
+// ============================================================
+//  RENDER — DEF panel
+// ============================================================
+function renderDef(s) {
+  const d = s.def;
+  const scopeLabel = SCOPE === 'all' ? 'celá sezóna' : 'v zápase';
+  return `
+    <div class="row metrics-4">
+      <div class="metric accent">
+        <div class="lbl">Body obdržené</div>
+        <div class="val">${d.pointsAgainst}</div>
+        <div class="sub">${SCOPE === 'all' ? d.pointsAvg + ' / zápas' : scopeLabel}</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Rush yardů soupeře</div>
+        <div class="val">—</div>
+        <div class="sub">v Phase 2</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Pass yardů soupeře</div>
+        <div class="val">—</div>
+        <div class="sub">v Phase 2</div>
+      </div>
+      <div class="metric accent">
+        <div class="lbl">Celkem yardů soupeře</div>
+        <div class="val">—</div>
+        <div class="sub">v Phase 2</div>
+      </div>
+    </div>
+
+    <div class="row metrics-3">
+      <div class="metric split">
+        <div class="lbl">Drive úspěšnost</div>
+        <div class="vals">
+          <span class="num">${d.stops}</span>
+          <span style="color:var(--text-subtle);font-size:13px">/ ${d.drives}</span>
+          <span class="pct">${d.stopPct}%</span>
+        </div>
+        <div class="sub">stops / drives soupeře</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Drive počet</div>
+        <div class="val">${d.drives}</div>
+        <div class="sub">drives soupeře</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Stops</div>
+        <div class="val">${d.stops}</div>
+        <div class="sub">ubráněných drivů</div>
+      </div>
+    </div>
+
+    <div class="row metrics-3">
+      <div class="metric">
+        <div class="lbl">Soupeřova 1PT</div>
+        <div class="val">—</div>
+        <div class="sub">v Phase 2</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Soupeřova 2PT</div>
+        <div class="val">—</div>
+        <div class="sub">v Phase 2</div>
+      </div>
+      <div class="metric">
+        <div class="lbl">Body proti / drive</div>
+        <div class="val">${d.drives ? Math.round(d.pointsAgainst/d.drives*10)/10 : 0}</div>
+        <div class="sub">průměr</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="coming-soon">
+        ⏳ Soupeřovy yardy a conversion vyžadují tracking opponent driveů přímo v aplikaci (zaznamenávat soupeřovy plays na obraně). To je úkol pro Phase 2.
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+//  RENDER — společné sekce (drives, fauly, match log)
+// ============================================================
+function renderCommon() {
+  const dr = DATA.driveResults;
+  const total = DATA.driveCount;
+
+  // Drive results — celosezónní (nezávisí na SCOPE, je to jen referenční)
+  const drvHTML = total === 0 ? '' : `
+    <div class="card">
+      <div class="card-title"><h3>Útočné drives — souhrn</h3><span class="meta">celá sezóna · ${total} drives</span></div>
       <div class="drv-results">
         <div class="drv-result td"><div class="v">${dr.td || 0}</div><div class="l">TD</div></div>
         <div class="drv-result"><div class="v">${dr.downs || 0}</div><div class="l">Downs</div></div>
         <div class="drv-result"><div class="v">${dr.int || 0}</div><div class="l">INT</div></div>
         <div class="drv-result"><div class="v">${dr.safety || 0}</div><div class="l">Safety</div></div>
-        <div class="drv-result"><div class="v">${(dr.halftime || 0) + (dr.eog || 0) + (dr.turnover || 0) + (dr.other || 0)}</div><div class="l">Ostatní</div></div>
+        <div class="drv-result"><div class="v">${(dr.halftime||0)+(dr.eog||0)+(dr.turnover||0)+(dr.other||0)}</div><div class="l">Ostatní</div></div>
       </div>
-      <div class="field" aria-hidden="true" id="field-viz">
-        <div class="endzone-l"></div>
-        <div class="endzone-r"></div>
-        <div class="midline"></div>
-        ${data.endPositions.map(b => `<div class="dot" style="left:${(b/50*100).toFixed(1)}%"></div>`).join('')}
+      <div class="field" aria-hidden="true">
+        <div class="endzone-l"></div><div class="endzone-r"></div><div class="midline"></div>
+        ${DATA.endPositions.map(b => `<div class="dot" style="left:${(b/50*100).toFixed(1)}%"></div>`).join('')}
       </div>
       <div class="field-cap"><span>Vlastní endzone</span><span>Středová čára</span><span>Soupeřova endzone</span></div>
     </div>`;
 
-  // Fauly + yardy v sezóně
-  const faulMax = Math.max(1, ...data.faulyBreakdown.map(f => f.count));
-  const faulRows = data.faulyBreakdown.map(f => {
+  // Fauly breakdown
+  const faulMax = Math.max(1, ...DATA.faulyBreakdown.map(f => f.count));
+  const faulRows = DATA.faulyBreakdown.map(f => {
     const sideClass = f.side === 'Útok' ? 'off' : f.side === 'Obrana' ? 'def' : 'both';
-    const sideLabel = f.side || '—';
     return `
       <div class="bar-row">
-        <span class="label">${escapeHTML(f.name)}<span class="side ${sideClass}">${escapeHTML(sideLabel)}</span></span>
+        <span class="label">${escapeHTML(f.name)}<span class="side ${sideClass}">${escapeHTML(f.side || '—')}</span></span>
         <span class="bar-vis">
           <span class="bar-wrap"><span class="bar ${sideClass}" style="width:${(f.count/faulMax*100).toFixed(0)}%"></span></span>
           <span class="bar-val">${f.count}</span>
@@ -386,27 +622,20 @@ function renderCoach(data, team) {
       </div>`;
   }).join('');
 
-  const grid2HTML = `
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title"><h3>Fauly podle typu</h3><span class="meta">strana faulu</span></div>
-        ${data.faulyBreakdown.length === 0 ? '<div class="empty">Žádné fauly v sezóně.</div>' : `
-          <div class="legend-inline">
-            <span><span class="swatch" style="background:var(--red)"></span>Útok</span>
-            <span><span class="swatch" style="background:var(--black)"></span>Obrana</span>
-            <span><span class="swatch" style="background:#185FA5"></span>Oba</span>
-          </div>
-          ${faulRows}`}
-      </div>
-      <div class="card">
-        <div class="card-title"><h3>Yardy v sezóně</h3><span class="meta">útočné yardy / zápas</span></div>
-        ${data.yardsTrend.length === 0 ? '<div class="empty">Žádné zápasy.</div>' :
-          `<div class="chart-wrap"><canvas id="ydsChart" role="img" aria-label="Spojnicový graf útočných yardů per zápas"></canvas></div>`}
-      </div>
+  const faulHTML = `
+    <div class="card">
+      <div class="card-title"><h3>Fauly podle typu</h3><span class="meta">strana faulu</span></div>
+      ${DATA.faulyBreakdown.length === 0 ? '<div class="empty">Žádné fauly v sezóně.</div>' : `
+        <div class="legend-inline">
+          <span><span class="swatch" style="background:var(--red)"></span>Útok</span>
+          <span><span class="swatch" style="background:var(--black)"></span>Obrana</span>
+          <span><span class="swatch" style="background:#185FA5"></span>Oba</span>
+        </div>
+        ${faulRows}`}
     </div>`;
 
   // Match log
-  const matchRows = data.matchLog.slice().reverse().map(m => `
+  const matchRows = DATA.matchLog.slice().reverse().map(m => `
     <tr>
       <td class="opp">${escapeHTML(m.opponent)}<span class="date"> · ${escapeHTML(m.date)}</span></td>
       <td class="num">${m.ourScore}–${m.oppScore}</td>
@@ -419,45 +648,62 @@ function renderCoach(data, team) {
     </tr>
   `).join('');
 
-  const logHTML = data.matchLog.length === 0 ? '' : `
+  const logHTML = DATA.matchLog.length === 0 ? '' : `
     <div class="card lb">
-      <div class="card-title"><h3>Match log</h3><span class="meta">${data.matchCount} zápasů</span></div>
+      <div class="card-title"><h3>Match log</h3><span class="meta">${DATA.matchCount} zápasů</span></div>
       <table>
         <thead><tr><th>Zápas</th><th class="num">Skóre</th><th class="num">Drives</th><th class="num">TD %</th><th class="num">Pass Y</th><th class="num">Rush Y</th><th class="num">Fauly</th><th></th></tr></thead>
         <tbody>${matchRows}</tbody>
       </table>
     </div>`;
 
-  document.getElementById('content').innerHTML = metricsHTML + drvHTML + grid2HTML + logHTML;
+  return drvHTML + faulHTML + logHTML;
+}
 
-  // Yards chart
-  if (data.yardsTrend.length > 0) {
-    new Chart(document.getElementById('ydsChart'), {
-      type: 'line',
-      data: {
-        labels: data.yardsTrend.map(t => t.opponent),
-        datasets: [{
-          label: 'OFF',
-          data: data.yardsTrend.map(t => t.off),
-          borderColor: '#DC1F26',
-          backgroundColor: 'rgba(220, 31, 38, 0.1)',
-          tension: 0.3, borderWidth: 2,
-          pointRadius: 4, pointBackgroundColor: '#DC1F26',
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { displayColors: false } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-          y: { beginAtZero: true, ticks: { stepSize: 50, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
-        }
-      }
-    });
+// ============================================================
+//  RENDER ROOT
+// ============================================================
+function renderAll() {
+  const stats = aggregateForScope();
+  if (!stats) {
+    document.getElementById('content').innerHTML = emptyState('Pro tento tým zatím nejsou žádná data.');
+    return;
   }
 
-  document.getElementById('hero-sub').textContent = `Trenérská analytika · ${team}`;
+  // Controls bar (period picker + tabs)
+  const matchOptions = DATA.matchLog.map(m =>
+    `<option value="${m.idx}"${String(m.idx) === SCOPE ? ' selected' : ''}>${escapeHTML(m.opponent)} · ${escapeHTML(m.date)}</option>`
+  ).join('');
+
+  const controlsHTML = `
+    <div class="controls">
+      <div class="tabs" role="tablist">
+        <button class="tab ${SIDE === 'off' ? 'active' : ''}" data-side="off">Útok</button>
+        <button class="tab ${SIDE === 'def' ? 'active' : ''}" data-side="def">Obrana</button>
+      </div>
+      <div class="scope">
+        <label for="scope-select">Rozsah</label>
+        <select id="scope-select">
+          <option value="all"${SCOPE === 'all' ? ' selected' : ''}>Celá sezóna</option>
+          ${matchOptions}
+        </select>
+      </div>
+    </div>`;
+
+  const sideHTML = SIDE === 'off' ? renderOff(stats) : renderDef(stats);
+
+  document.getElementById('content').innerHTML = controlsHTML + sideHTML + renderCommon();
+
+  // Event handlery
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => { SIDE = btn.dataset.side; renderAll(); });
+  });
+  document.getElementById('scope-select').addEventListener('change', e => {
+    SCOPE = e.target.value;
+    renderAll();
+  });
+
+  document.getElementById('hero-sub').textContent = `Trenérská analytika · ${CURRENT_TEAM}`;
 }
 
 // ============================================================
@@ -474,10 +720,11 @@ async function loadTeams() {
 }
 
 async function loadAndRender(team) {
+  CURRENT_TEAM = team;
   document.getElementById('content').innerHTML = `<div class="loading"><div class="spinner"></div>Načítám data…</div>`;
   try {
-    const data = await jsonp({ action: 'coachStats', team });
-    renderCoach(data, team);
+    DATA = await jsonp({ action: 'coachStats', team });
+    renderAll();
   } catch (e) {
     console.error('coachStats failed:', e);
     document.getElementById('content').innerHTML = `
@@ -502,6 +749,7 @@ async function loadAndRender(team) {
   picker.value = initial;
   if (teams.length === 1) picker.style.display = 'none';
   picker.addEventListener('change', () => {
+    SIDE = 'off'; SCOPE = 'all';
     loadAndRender(picker.value);
     const u = new URL(window.location.href);
     u.searchParams.set('team', picker.value);

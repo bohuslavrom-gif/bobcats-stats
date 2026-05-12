@@ -275,8 +275,12 @@ body {
   .hero .logo { width: 48px; height: 48px; }
   .metric .val { font-size: 26px; }
   .card { padding: 14px 16px; }
-  .lb th, .lb td { padding: 6px 4px; }
-  .lb th:nth-child(4), .lb td:nth-child(4) { display: none; }
+  .lb th, .lb td { padding: 6px 4px; font-size: 12px; }
+  /* Na mobilu skrýt mid-cols ATT/REC/%/YDS, nechat #, Hráč, TD, PTS */
+  .lb th:nth-child(4), .lb td:nth-child(4),
+  .lb th:nth-child(5), .lb td:nth-child(5),
+  .lb th:nth-child(6), .lb td:nth-child(6),
+  .lb th:nth-child(7), .lb td:nth-child(7) { display: none; }
 }
 </style>
 </head>
@@ -375,36 +379,45 @@ function renderPublic(data, team) {
   const metricsHTML = `
     <div class="row metrics">
       <div class="metric accent"><div class="lbl">Bilance</div><div class="val">${recordVal}</div><div class="sub">W — L${r.ties ? ' — T' : ''}</div></div>
-      <div class="metric accent"><div class="lbl">Body za</div><div class="val">${p.for}</div><div class="sub">${p.forAvg} / zápas</div></div>
-      <div class="metric"><div class="lbl">Body proti</div><div class="val">${p.against}</div><div class="sub">${p.againstAvg} / zápas</div></div>
+      <div class="metric accent"><div class="lbl">Body skórované</div><div class="val">${p.for}</div><div class="sub">${p.forAvg} / zápas</div></div>
+      <div class="metric"><div class="lbl">Body obdržené</div><div class="val">${p.against}</div><div class="sub">${p.againstAvg} / zápas</div></div>
       <div class="metric"><div class="lbl">Zápasů</div><div class="val">${r.matches}</div><div class="sub">v sezóně</div></div>
     </div>`;
 
-  // Top scoreři
-  const topRows = data.topScorers.map((pl, i) => `
-    <tr>
-      <td class="pos${i === 0 ? ' gold' : ''}">${i + 1}</td>
-      <td>
-        <div class="player">
-          ${avatarHTML(pl, i)}
-          <div>
-            <div class="name">${escapeHTML(pl.name)}</div>
-            <div class="meta">${escapeHTML(pl.pos)}${pl.jersey ? ' · #' + escapeHTML(pl.jersey) : ''}</div>
+  // OFFENSE leaderboard — TD, ATT (targets pro WR / pass att pro QB), REC, %, YDS, PTS
+  const topRows = data.topScorers.map((pl, i) => {
+    // ATT závisí na pozici: WR = targets (kolik mu letělo míčů), QB = pass attempts
+    const isQB = pl.pos === 'QB';
+    const att  = isQB ? pl.qb.att : pl.wr.targets;
+    const rec  = isQB ? pl.qb.comp : pl.wr.rec;
+    const yds  = isQB ? pl.qb.yds : pl.wr.yds;
+    const pct  = att ? Math.round(rec/att*100) + '%' : '—';
+    return `
+      <tr>
+        <td class="pos${i === 0 ? ' gold' : ''}">${i + 1}</td>
+        <td>
+          <div class="player">
+            ${avatarHTML(pl, i)}
+            <div>
+              <div class="name">${escapeHTML(pl.name)}</div>
+              <div class="meta">${escapeHTML(pl.pos)}${pl.jersey ? ' · #' + escapeHTML(pl.jersey) : ''}</div>
+            </div>
           </div>
-        </div>
-      </td>
-      <td class="num">${pl.totalTd}</td>
-      <td class="num">${pl.wr.rec}</td>
-      <td class="num">${pl.wr.yds}</td>
-      <td class="num">${pl.totalPts}</td>
-    </tr>
-  `).join('');
+        </td>
+        <td class="num">${pl.totalTd}</td>
+        <td class="num">${att}</td>
+        <td class="num">${rec}</td>
+        <td class="num">${pct}</td>
+        <td class="num">${yds}</td>
+        <td class="num">${pl.totalPts}</td>
+      </tr>`;
+  }).join('');
 
   const topHTML = data.topScorers.length === 0 ? '' : `
     <div class="card lb">
-      <div class="card-title"><h3>Top scoreři</h3><span class="meta">body celkem</span></div>
+      <div class="card-title"><h3>Offense</h3><span class="meta">body celkem</span></div>
       <table>
-        <thead><tr><th></th><th>Hráč</th><th class="num">TD</th><th class="num">REC</th><th class="num">YDS</th><th class="num">PTS</th></tr></thead>
+        <thead><tr><th></th><th>Hráč</th><th class="num">TD</th><th class="num">ATT</th><th class="num">REC</th><th class="num">%</th><th class="num">YDS</th><th class="num">PTS</th></tr></thead>
         <tbody>${topRows}</tbody>
       </table>
     </div>`;
@@ -432,7 +445,7 @@ function renderPublic(data, team) {
         <div class="chart-wrap"><canvas id="tdChart" role="img" aria-label="Sloupcový graf počtu touchdownů per hráč"></canvas></div>
       </div>
       <div class="card lb">
-        <div class="card-title"><h3>Defenze</h3><span class="meta">FP / SACK / INT</span></div>
+        <div class="card-title"><h3>Defense</h3><span class="meta">FP / SACK / INT</span></div>
         ${data.defenseLeaders.length === 0 ? '<div class="empty">Žádné defenzivní statistiky.</div>' : `
           <table>
             <thead><tr><th>Hráč</th><th class="num">FP</th><th class="num">SACK</th><th class="num">INT</th></tr></thead>
