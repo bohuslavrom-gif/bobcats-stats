@@ -384,14 +384,44 @@ function renderPublic(data, team) {
       <div class="metric"><div class="lbl">Zápasů</div><div class="val">${r.matches}</div><div class="sub">v sezóně</div></div>
     </div>`;
 
-  // OFFENSE leaderboard — TD, ATT (targets pro WR / pass att pro QB), REC, %, YDS, PTS
-  const topRows = data.topScorers.map((pl, i) => {
-    // ATT závisí na pozici: WR = targets (kolik mu letělo míčů), QB = pass attempts
-    const isQB = pl.pos === 'QB';
-    const att  = isQB ? pl.qb.att : pl.wr.targets;
-    const rec  = isQB ? pl.qb.comp : pl.wr.rec;
-    const yds  = isQB ? pl.qb.yds : pl.wr.yds;
-    const pct  = att ? Math.round(rec/att*100) + '%' : '—';
+  // OFFENSE — separátně QB a WR tabulka
+  const qbList = data.qbStats || [];
+  const wrList = data.wrStats || [];
+
+  // QB tabulka: # | Hráč | ATT | COMP | TD | INT | YDS
+  const qbRows = qbList.map((pl, i) => `
+    <tr>
+      <td class="pos${i === 0 ? ' gold' : ''}">${i + 1}</td>
+      <td>
+        <div class="player">
+          ${avatarHTML(pl, i)}
+          <div>
+            <div class="name">${escapeHTML(pl.name)}</div>
+            <div class="meta">QB${pl.jersey ? ' · #' + escapeHTML(pl.jersey) : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td class="num">${pl.qb.att}</td>
+      <td class="num">${pl.qb.comp}</td>
+      <td class="num">${pl.qb.td}</td>
+      <td class="num">${pl.qb.int}</td>
+      <td class="num">${pl.qb.yds}</td>
+    </tr>`).join('');
+
+  const qbHTML = qbList.length === 0 ? '' : `
+    <div class="card lb">
+      <div class="card-title"><h3>Quarterback</h3><span class="meta">passing stats</span></div>
+      <table>
+        <thead><tr><th></th><th>Hráč</th><th class="num">ATT</th><th class="num">COMP</th><th class="num">TD</th><th class="num">INT</th><th class="num">YDS</th></tr></thead>
+        <tbody>${qbRows}</tbody>
+      </table>
+    </div>`;
+
+  // WR tabulka: # | Hráč | TD | ATT (targets) | REC | % | YDS | PTS
+  const wrRows = wrList.map((pl, i) => {
+    const att = pl.wr.targets;
+    const rec = pl.wr.rec;
+    const pct = att ? Math.round(rec/att*100) + '%' : '—';
     return `
       <tr>
         <td class="pos${i === 0 ? ' gold' : ''}">${i + 1}</td>
@@ -400,29 +430,31 @@ function renderPublic(data, team) {
             ${avatarHTML(pl, i)}
             <div>
               <div class="name">${escapeHTML(pl.name)}</div>
-              <div class="meta">${escapeHTML(pl.pos)}${pl.jersey ? ' · #' + escapeHTML(pl.jersey) : ''}</div>
+              <div class="meta">WR${pl.jersey ? ' · #' + escapeHTML(pl.jersey) : ''}</div>
             </div>
           </div>
         </td>
-        <td class="num">${pl.totalTd}</td>
+        <td class="num">${pl.wr.td}</td>
         <td class="num">${att}</td>
         <td class="num">${rec}</td>
         <td class="num">${pct}</td>
-        <td class="num">${yds}</td>
-        <td class="num">${pl.totalPts}</td>
+        <td class="num">${pl.wr.yds}</td>
+        <td class="num">${pl.wr.pts}</td>
       </tr>`;
   }).join('');
 
-  const topHTML = data.topScorers.length === 0 ? '' : `
+  const wrHTML = wrList.length === 0 ? '' : `
     <div class="card lb">
-      <div class="card-title"><h3>Offense</h3><span class="meta">body celkem</span></div>
+      <div class="card-title"><h3>Wide Receiver</h3><span class="meta">receiving stats</span></div>
       <table>
         <thead><tr><th></th><th>Hráč</th><th class="num">TD</th><th class="num">ATT</th><th class="num">REC</th><th class="num">%</th><th class="num">YDS</th><th class="num">PTS</th></tr></thead>
-        <tbody>${topRows}</tbody>
+        <tbody>${wrRows}</tbody>
       </table>
     </div>`;
 
-  // TDs chart + Defense
+  const topHTML = qbHTML + wrHTML;
+
+  // TDs chart + Defense (s BU sloupcem)
   const defRows = data.defenseLeaders.map((pl, i) => `
     <tr>
       <td>
@@ -434,6 +466,7 @@ function renderPublic(data, team) {
       </td>
       <td class="num">${pl.db.flagPull}</td>
       <td class="num">${pl.db.sack}</td>
+      <td class="num">${pl.db.brkup}</td>
       <td class="num">${pl.db.int}</td>
     </tr>
   `).join('');
@@ -445,10 +478,10 @@ function renderPublic(data, team) {
         <div class="chart-wrap"><canvas id="tdChart" role="img" aria-label="Sloupcový graf počtu touchdownů per hráč"></canvas></div>
       </div>
       <div class="card lb">
-        <div class="card-title"><h3>Defense</h3><span class="meta">FP / SACK / INT</span></div>
+        <div class="card-title"><h3>Defense</h3><span class="meta">FP / SACK / BU / INT</span></div>
         ${data.defenseLeaders.length === 0 ? '<div class="empty">Žádné defenzivní statistiky.</div>' : `
           <table>
-            <thead><tr><th>Hráč</th><th class="num">FP</th><th class="num">SACK</th><th class="num">INT</th></tr></thead>
+            <thead><tr><th>Hráč</th><th class="num">FP</th><th class="num">SACK</th><th class="num">BU</th><th class="num">INT</th></tr></thead>
             <tbody>${defRows}</tbody>
           </table>`}
       </div>
