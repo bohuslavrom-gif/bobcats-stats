@@ -5,41 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Bobcats Stats">
+<meta name="apple-mobile-web-app-title" content="PlayMetric">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#DC1F26">
+<meta name="theme-color" content="#0F1B2D">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="bobcats-logo.png">
-<link rel="icon" type="image/png" href="bobcats-logo.png">
-<title>Bobcats Stats</title>
+<link rel="apple-touch-icon" href="brand/playmetric-app-icon.svg">
+<link rel="icon" type="image/svg+xml" href="brand/playmetric-favicon.svg">
+<title>PlayMetric</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
   :root {
-    --bg: #f2f2f7;
-    --surface: #ffffff;
-    --surface2: #f8f8fb;
-    --border: #e5e5ea;
-    --border2: #d1d1d6;
-    --text: #1c1c1e;
-    --text2: #48484a;
-    --text3: #8e8e93;
-    --green: #34c759;
-    --green-bg: #e8f8ed;
-    --green-dark: #1a7a32;
-    --blue: #007aff;
-    --blue-bg: #e5f1ff;
-    --red: #ff3b30;
-    --red-bg: #fff0ef;
-    --orange: #ff9500;
-    --orange-bg: #fff5e5;
-    --purple: #af52de;
-    --purple-bg: #f5eaff;
-    --gold: #b8860b;
-    --gold-bg: #fdf6e3;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow: 0 2px 8px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    /* PlayMetric — light app shell */
+    --ink: #0F1B2D;          /* Primary brand, headlines, scoreboard */
+    --signal: #E63946;       /* CTA / negative actions / red highlights */
+    --pearl: #FFFFFF;
+    --mist: #F5F7FA;
+    --stone: #E1E5EB;
+    --stone-2: #C5CCD3;
+    --slate: #5B6B7E;
+    --graphite: #2D3748;
+    --sky: #7AB5D9;
+    --verde: #2A9D8F;
+    --spark: #F4A261;
+    --plum: #7B5BA6;
+
+    /* Semantic aliases — udržuje legacy CSS bez velkých refaktorů */
+    --bg: var(--mist);
+    --surface: var(--pearl);
+    --surface2: var(--mist);
+    --border: var(--stone);
+    --border2: var(--stone-2);
+    --text: var(--ink);
+    --text2: var(--graphite);
+    --text3: var(--slate);
+    --green: var(--verde);
+    --green-bg: #E0F2EE;
+    --green-dark: #1F6E63;
+    --blue: var(--ink);
+    --blue-bg: #E1EBF8;
+    --red: var(--signal);
+    --red-bg: #FCE4E6;
+    --orange: var(--spark);
+    --orange-bg: #FCEEDD;
+    --purple: var(--plum);
+    --purple-bg: #ECE5F4;
+    --gold: var(--spark);
+    --gold-bg: #FCEEDD;
+
+    --shadow-sm: 0 1px 2px rgba(15, 27, 45, 0.06);
+    --shadow: 0 2px 8px rgba(15, 27, 45, 0.08), 0 1px 3px rgba(15, 27, 45, 0.04);
   }
+
+  /* Universal SVG icon — used inline in buttons */
+  .ic { width: 18px; height: 18px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
+  .ic-sm { width: 14px; height: 14px; }
+  .ic-lg { width: 22px; height: 22px; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -51,17 +72,34 @@
     font-size: 15px;
   }
 
-  /* TOP BAR */
+  /* PlayMetric brand strip — slim header above scoreboard */
+  .pm-strip {
+    background: var(--ink);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 6px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+    position: sticky; top: 0; z-index: 51;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .pm-strip .pm-mark { display: inline-flex; align-items: center; gap: 8px; color: #FFFFFF; }
+  .pm-strip .pm-mark svg { width: 16px; height: 16px; }
+  .pm-strip .pm-name { font-weight: 700; letter-spacing: -0.2px; text-transform: none; font-size: 0.78rem; color: #FFFFFF; }
+  .pm-strip .pm-name .accent { color: var(--signal); }
+  .pm-strip .pm-tag { color: rgba(255, 255, 255, 0.5); }
+
+  /* TOP BAR — navy scoreboard */
   .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 16px;
+    background: var(--ink);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
-    top: 0;
+    top: 28px;
     z-index: 50;
+    color: #FFFFFF;
   }
   .score-board {
     display: flex;
@@ -77,30 +115,33 @@
     min-width: 64px;
   }
   .team-score .name {
-    font-size: 0.6rem;
-    font-weight: 600;
-    color: var(--text3);
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    display: inline-flex; align-items: center; gap: 4px;
   }
   .team-score .pts {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text);
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #FFFFFF;
     line-height: 1;
     letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
   }
-  .score-sep { font-size: 0.9rem; color: var(--text3); padding: 0 3px; margin-top: 12px; }
+  .score-sep { font-size: 0.85rem; color: rgba(255, 255, 255, 0.3); padding: 0 4px; margin-top: 14px; font-weight: 400; }
   .team-score.clickable {
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 4px 10px;
     transition: background 0.15s;
     border: 1.5px solid transparent;
   }
-  .team-score.clickable:hover { background: var(--surface2); }
-  .team-score.clickable.active { background: var(--green-bg); border-color: rgba(52,199,89,0.3); }
-  .ball-indicator { font-size: 0.65rem; }
+  .team-score.clickable:hover { background: rgba(255, 255, 255, 0.06); }
+  .team-score.clickable.active { background: rgba(230, 57, 70, 0.14); border-color: rgba(230, 57, 70, 0.4); }
+  .team-score.clickable.active .name { color: #FCA5AB; }
+  .ball-indicator { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--signal); }
 
   /* TIMEOUTS */
   .timeout-dots {
@@ -112,41 +153,40 @@
   }
   .timeout-dots .to-label {
     font-size: 0.55rem;
-    font-weight: 600;
-    color: var(--text3);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
   }
   .to-dots { display: flex; gap: 5px; }
   .to-dot {
-    width: 10px; height: 10px;
+    width: 9px; height: 9px;
     border-radius: 50%;
-    background: var(--orange);
+    background: var(--spark);
     border: none; cursor: pointer;
     padding: 0;
     transition: all 0.15s;
-    box-shadow: 0 1px 3px rgba(255,149,0,0.4);
   }
   .to-dot:hover { transform: scale(1.2); }
   .to-dot.used {
-    background: var(--border);
+    background: rgba(255, 255, 255, 0.15);
     box-shadow: none;
   }
 
   .top-actions { display: flex; gap: 6px; }
   .top-btn {
-    width: 34px; height: 34px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text2);
-    font-size: 1rem;
-    border-radius: 10px;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.15s;
     display: flex; align-items: center; justify-content: center;
     padding: 0;
   }
-  .top-btn:hover { background: var(--border); }
+  .top-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); color: #FFFFFF; }
+  .top-btn .ic { width: 18px; height: 18px; }
 
   /* OFFENSE BAR */
   .offense-bar {
@@ -284,38 +324,39 @@
     color: var(--green-dark);
   }
 
-  /* Play cards */
+  /* Play cards — flat refined */
   .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .play-btn {
-    padding: 13px 14px;
-    border: 1.5px solid var(--border);
+    padding: 14px 14px;
+    border: 1px solid var(--stone);
     background: var(--surface);
     color: var(--text);
     font-family: 'Inter', sans-serif;
-    font-size: 0.88rem; font-weight: 600;
-    border-radius: 12px; cursor: pointer;
-    transition: all 0.15s;
-    display: flex; align-items: center; gap: 10px;
-    box-shadow: var(--shadow-sm); text-align: left;
+    font-size: 0.88rem; font-weight: 500;
+    border-radius: 10px; cursor: pointer;
+    transition: all 0.12s;
+    display: flex; align-items: center; gap: 12px;
+    text-align: left;
   }
   .play-btn .icon {
-    font-size: 1.2rem; width: 34px; height: 34px;
+    width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 8px; background: var(--surface2); flex-shrink: 0;
+    border-radius: 8px; background: var(--mist); flex-shrink: 0;
+    color: var(--slate);
   }
-  .play-btn:active { transform: scale(0.97); }
-  .play-btn.run .icon { background: #e5f1ff; }
-  .play-btn.run.selected, .play-btn.run:hover { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
-  .play-btn.pass .icon { background: var(--green-bg); }
-  .play-btn.pass.selected, .play-btn.pass:hover { border-color: var(--green); background: var(--green-bg); color: var(--green-dark); }
-  .play-btn.sack .icon { background: var(--red-bg); }
-  .play-btn.sack.selected, .play-btn.sack:hover { border-color: var(--red); background: var(--red-bg); color: var(--red); }
-  .play-btn.penalty .icon { background: var(--orange-bg); }
-  .play-btn.penalty.selected, .play-btn.penalty:hover { border-color: var(--orange); background: var(--orange-bg); color: var(--orange); }
-  .play-btn.safety .icon { background: var(--purple-bg); }
-  .play-btn.safety.selected, .play-btn.safety:hover { border-color: var(--purple); background: var(--purple-bg); color: var(--purple); }
-  .play-btn.td .icon { background: var(--gold-bg); }
-  .play-btn.td.selected, .play-btn.td:hover { border-color: var(--gold); background: var(--gold-bg); color: var(--gold); }
+  .play-btn .icon .ic { width: 20px; height: 20px; }
+  .play-btn:hover { border-color: var(--ink); }
+  .play-btn:active { transform: scale(0.98); }
+  .play-btn.selected,
+  .play-btn:hover { border-color: var(--ink); }
+  .play-btn.selected { background: var(--ink); color: #FFFFFF; }
+  .play-btn.selected .icon { background: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+  /* Per-type accent on the icon when selected */
+  .play-btn.pass.selected .icon  { color: var(--sky); }
+  .play-btn.run.selected  .icon  { color: var(--verde); }
+  .play-btn.sack.selected .icon  { color: var(--signal); }
+  .play-btn.penalty.selected .icon { color: var(--spark); }
+  .play-btn.safety.selected .icon { color: var(--plum); }
 
   /* Step panels */
   .step-panel {
@@ -366,17 +407,20 @@
   }
   .yard-quick-btn:hover { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
 
-  /* Confirm */
+  /* Confirm — primary CTA = Signal red */
   .confirm-btn {
     width: 100%; padding: 14px;
-    background: var(--green); color: white;
+    background: var(--signal); color: #FFFFFF;
     font-family: 'Inter', sans-serif;
     font-size: 0.95rem; font-weight: 700;
-    border: none; border-radius: 12px; cursor: pointer;
-    transition: all 0.15s; margin-top: 4px;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: all 0.12s; margin-top: 4px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    letter-spacing: -0.2px;
   }
-  .confirm-btn:hover { background: #2db350; }
+  .confirm-btn:hover { background: #C8313D; }
   .confirm-btn:active { transform: scale(0.98); }
+  .confirm-btn .ic { width: 18px; height: 18px; stroke-width: 2; }
 
   /* WIZARD STEPPER */
   .wizard-wrap {
@@ -816,21 +860,47 @@
   .play-call-bar-wrap { margin-top: 6px; height: 5px; background: var(--border); border-radius: 3px; overflow:hidden; }
   .play-call-bar { height: 100%; border-radius: 3px; background: var(--green); transition: width 0.4s; }
 
-  /* TD Banner */
+  /* TD Banner — navy + signal accent */
   .td-banner {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(15, 27, 45, 0.65);
     display: flex; align-items: center; justify-content: center;
-    z-index: 200; backdrop-filter: blur(4px);
+    z-index: 200; backdrop-filter: blur(6px);
   }
   .td-banner-inner {
-    background: white; border-radius: 24px;
-    padding: 30px 44px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    background: var(--ink); color: #FFFFFF;
+    border-radius: 18px;
+    padding: 36px 56px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
     animation: tdPop 0.28s cubic-bezier(0.17,0.89,0.32,1.27);
+    position: relative;
+    overflow: hidden;
   }
-  .td-emoji { font-size: 3rem; }
-  .td-text { font-size: 1.8rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; margin-top: 6px; }
+  .td-banner-inner::before {
+    content: ""; position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 4px; background: var(--signal);
+  }
+  .td-mark {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(230, 57, 70, 0.16);
+    color: var(--signal);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .td-mark .ic { width: 36px; height: 36px; stroke-width: 2.2; }
+  .td-text {
+    font-size: 1.9rem; font-weight: 700; color: #FFFFFF;
+    letter-spacing: -0.04em; margin-top: 4px;
+  }
+  .td-sub {
+    font-size: 0.75rem; font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase; letter-spacing: 0.16em;
+    margin-top: 6px;
+  }
   @keyframes tdPop {
     from { transform: scale(0.6); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -843,6 +913,39 @@
 </style>
 </head>
 <body>
+<!-- SVG icon library — referenced via <use href="#ic-..." /> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ic-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M3 21v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-1a5 5 0 0 0-3-4.58"/></symbol>
+    <symbol id="ic-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="6" rx="0.5"/><rect x="13" y="9" width="3" height="10" rx="0.5"/><rect x="19" y="5" width="3" height="14" rx="0.5"/></symbol>
+    <symbol id="ic-pass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17C7 9 13 5 21 4"/><path d="M14 4h7v7"/><circle cx="6" cy="18" r="1.5"/></symbol>
+    <symbol id="ic-run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="M13 6l6 6-6 6"/></symbol>
+    <symbol id="ic-sack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></symbol>
+    <symbol id="ic-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z"/></symbol>
+    <symbol id="ic-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="ic-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></symbol>
+    <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l18 12"/></symbol>
+    <symbol id="ic-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5a6 6 0 1 1-12 0Z"/><path d="M6 5H3v3a3 3 0 0 0 3 3"/><path d="M18 5h3v3a3 3 0 0 1-3 3"/><path d="M9 21h6"/><path d="M12 17v4"/></symbol>
+    <symbol id="ic-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="ic-pm-mark" viewBox="0 0 64 64" fill="none"><rect x="8" y="44" width="6" height="12" rx="1" fill="currentColor" fill-opacity="0.55"/><rect x="18" y="34" width="6" height="22" rx="1" fill="currentColor" fill-opacity="0.55"/><rect x="28" y="20" width="6" height="36" rx="1" fill="currentColor"/><polygon points="38,18 56,37 38,56" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<!-- PlayMetric brand strip -->
+<div class="pm-strip">
+  <span class="pm-mark">
+    <svg viewBox="0 0 64 64" style="color:#E63946"><use href="#ic-pm-mark"/></svg>
+    <span class="pm-name">Play<span class="accent">Metric</span></span>
+  </span>
+  <span class="pm-tag">Measure every play</span>
+</div>
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -857,12 +960,12 @@
     </div>
 
     <div class="team-score clickable" id="score-team-a" onclick="selectTeam('A')" title="Přepnout na útok">
-      <span class="name"><span class="ball-indicator" id="ball-ind-a">🏈 </span><span id="score-name-a">TÝM A</span></span>
+      <span class="name"><span class="ball-indicator" id="ball-ind-a"></span><span id="score-name-a">TÝM A</span></span>
       <span class="pts" id="score-a">0</span>
     </div>
     <span class="score-sep">–</span>
     <div class="team-score clickable" id="score-team-b" onclick="selectTeam('B')" title="Přepnout na útok">
-      <span class="name"><span class="ball-indicator" id="ball-ind-b" style="display:none">🏈 </span><span id="score-name-b">TÝM B</span></span>
+      <span class="name"><span class="ball-indicator" id="ball-ind-b" style="display:none"></span><span id="score-name-b">TÝM B</span></span>
       <span class="pts" id="score-b">0</span>
     </div>
 
@@ -877,8 +980,8 @@
   </div>
 
   <div class="top-actions">
-    <button class="top-btn" onclick="openPlayers()" title="Hráči">👤</button>
-    <button class="top-btn" onclick="openStats()" title="Statistiky">📊</button>
+    <button class="top-btn" onclick="openPlayers()" title="Hráči" aria-label="Hráči"><svg class="ic"><use href="#ic-users"/></svg></button>
+    <button class="top-btn" onclick="openStats()" title="Statistiky" aria-label="Statistiky"><svg class="ic"><use href="#ic-chart"/></svg></button>
   </div>
 </div>
 
@@ -929,19 +1032,19 @@
     <div class="section-label">Typ hraje</div>
     <div class="play-grid">
       <button class="play-btn pass" onclick="selectPlay('pass')">
-        <span class="icon">🏈</span><span class="label">Pass Play</span>
+        <span class="icon"><svg class="ic"><use href="#ic-pass"/></svg></span><span class="label">Pass Play</span>
       </button>
       <button class="play-btn run" onclick="selectPlay('run')">
-        <span class="icon">🏃</span><span class="label">Rush Play</span>
+        <span class="icon"><svg class="ic"><use href="#ic-run"/></svg></span><span class="label">Rush Play</span>
       </button>
       <button class="play-btn sack" onclick="selectPlay('sack')">
-        <span class="icon">⚡</span><span class="label">Sack</span>
+        <span class="icon"><svg class="ic"><use href="#ic-sack"/></svg></span><span class="label">Sack</span>
       </button>
       <button class="play-btn penalty" onclick="selectPlay('penalty')">
-        <span class="icon">🚩</span><span class="label">Penalty</span>
+        <span class="icon"><svg class="ic"><use href="#ic-flag"/></svg></span><span class="label">Penalty</span>
       </button>
       <button class="play-btn safety" onclick="selectPlay('safety')">
-        <span class="icon">🛡️</span><span class="label">Safety</span>
+        <span class="icon"><svg class="ic"><use href="#ic-shield"/></svg></span><span class="label">Safety</span>
       </button>
     </div>
 
@@ -950,7 +1053,7 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="section-label">Průběh hry</div>
-    <button class="undo-btn" onclick="undoPlay()">↩ Vrátit poslední</button>
+    <button class="undo-btn" onclick="undoPlay()"><svg class="ic ic-sm"><use href="#ic-undo"/></svg> Vrátit poslední</button>
     <div class="play-log" id="play-log">
       <div class="empty-log">Zatím žádná hra…</div>
     </div>
@@ -967,7 +1070,7 @@
       <label for="profile-select" style="font-size:0.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em">Náš tým</label>
       <select id="profile-select" onchange="switchProfile(this.value)" style="flex:1;padding:8px 28px 8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);font-family:inherit;font-size:0.85rem;font-weight:600;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22 viewBox=%220 0 10 6%22><path fill=%22%23888%22 d=%22M0 0l5 6 5-6z%22/></svg>');background-repeat:no-repeat;background-position:right 8px center"></select>
       <button onclick="createProfile()" title="Vytvořit nový tým" style="padding:8px 12px;border:1px solid var(--border2);background:var(--surface2);border-radius:8px;cursor:pointer;font-size:0.95rem;font-weight:600;color:var(--blue)">+</button>
-      <button onclick="deleteProfile()" title="Smazat aktuální tým" style="padding:8px 10px;border:1px solid var(--border2);background:var(--surface2);border-radius:8px;cursor:pointer;font-size:0.85rem;color:var(--red)">🗑</button>
+      <button onclick="deleteProfile()" title="Smazat aktuální tým" aria-label="Smazat tým" style="padding:8px 10px;border:1px solid var(--border2);background:var(--surface2);border-radius:8px;cursor:pointer;color:var(--signal);display:inline-flex;align-items:center"><svg class="ic ic-sm"><use href="#ic-trash"/></svg></button>
     </div>
     <div class="modal-team-tabs">
       <button class="modal-tab active" id="ptab-a" onclick="switchPlayerTab('A')">TÝM A</button>
@@ -1005,7 +1108,7 @@
 <!-- STATS PAGE (fullscreen) -->
 <div id="stats-page" class="stats-page" style="display:none">
   <div class="stats-header">
-    <button class="stats-back-btn" onclick="closeStats()">‹</button>
+    <button class="stats-back-btn" onclick="closeStats()" aria-label="Zpět"><svg class="ic"><use href="#ic-chevron-left"/></svg></button>
     <div class="stats-header-title" id="stats-header-title">Statistiky</div>
     <div class="stats-team-switcher">
       <button class="stats-team-btn active" id="spage-tab-a" onclick="switchStatsTeam('A')">TÝM A</button>
@@ -1023,8 +1126,9 @@
 <!-- TD BANNER -->
 <div class="td-banner" id="td-banner" style="display:none" onclick="this.style.display='none'">
   <div class="td-banner-inner">
-    <div class="td-emoji">🏆</div>
-    <div class="td-text">TOUCHDOWN!</div>
+    <div class="td-mark"><svg class="ic"><use href="#ic-trophy"/></svg></div>
+    <div class="td-text">Touchdown</div>
+    <div class="td-sub">+6 points</div>
   </div>
 </div>
 
@@ -1299,7 +1403,7 @@ function renderXPWizard() {
 
   // Build steps
   let steps = [
-    { key:'xpType', label:'🏆 Potvrzení — vyber typ', options:['1PT – z 5yd','2PT – z 10yd','Přeskočit'] },
+    { key:'xpType', label:'Potvrzení — vyber typ', options:['1PT – z 5yd','2PT – z 10yd','Přeskočit'] },
   ];
   if (xpSel.xpType === '1PT – z 5yd' || xpSel.xpType === '2PT – z 10yd') {
     if (scoringTeam.players.length > 0) {
@@ -1605,7 +1709,7 @@ function renderSteps() {
 
 function buildChoiceStep(step) {
   if (!step.options || step.options.length === 0) {
-    return `<div class="wizard-step"><div style="color:var(--red);font-size:0.82rem">⚠ Nejsou přidáni hráči pro tuto pozici</div></div>`;
+    return `<div class="wizard-step"><div style="color:var(--signal);font-size:0.82rem;display:inline-flex;align-items:center;gap:6px"><svg class="ic ic-sm"><use href="#ic-alert"/></svg> Nejsou přidáni hráči pro tuto pozici</div></div>`;
   }
   const btns = step.options.map((opt, i) => {
     const cls = (step.classes && step.classes[i]) ? ' ' + step.classes[i] : '';
@@ -1839,7 +1943,7 @@ function resetPlay() {
 function renderLog() {
   const log = document.getElementById('play-log');
   if (state.playLog.length===0) { log.innerHTML='<div class="empty-log">Zatím žádná hra…</div>'; return; }
-  const badgeLabel = {run:'Rush',run_td:'Rush TD 🏆',pass:'Pass',pass_td:'Pass TD 🏆',sack:'Sack',penalty:'Foul',safety:'Safety',td:'TD 🏆',inttd:'INT-TD',xp1:'+1 XP ✓',xp2:'+2 XP ✓',xp0:'XP ✗'};
+  const badgeLabel = {run:'Rush',run_td:'Rush TD',pass:'Pass',pass_td:'Pass TD',sack:'Sack',penalty:'Foul',safety:'Safety',td:'TD',inttd:'INT-TD',xp1:'+1 XP',xp2:'+2 XP',xp0:'XP fail'};
   log.innerHTML = state.playLog.map(p=>`
     <div class="play-log-item">
       <div class="play-meta">
@@ -1891,7 +1995,7 @@ function renderPlaybookList() {
   const list = document.getElementById('playbook-list');
   list.innerHTML = state.playbook.map((name,i) => `
     <div class="player-row">
-      <span class="pos-badge" style="background:var(--gold-bg);color:var(--gold);min-width:28px">🏈</span>
+      <span class="pos-badge" style="background:var(--gold-bg);color:var(--gold);min-width:28px;display:inline-flex;align-items:center;justify-content:center"><svg class="ic ic-sm"><use href="#ic-flag"/></svg></span>
       <span class="pname">${name}</span>
       <button class="del-btn" onclick="removePlaybookPlay(${i})">✕</button>
     </div>`).join('') || '<div style="color:var(--text3);font-size:0.82rem;padding:8px">Žádné hry v playbooku</div>';
@@ -2631,12 +2735,56 @@ function removePlaybookPlay(i) {
 let currentHalf = 1;
 
 function startSecondHalf() {
-  if (!confirm('Přepnout na 2. poločas? Timeouty se resetují.')) return;
+  if (!confirm('Přepnout na 2. poločas?\n\n• Aktuální drive skončí (pokud nebyl TD = neúspěšný)\n• Balon: 5 yd\n• Soupeř na příjmu\n• Timeouty resetovány')) return;
+
+  if (state.awaitingExtraPoint) {
+    alert('Nelze přepnout — čeká se na potvrzení Extra Point. Nejdřív ho dokončete.');
+    return;
+  }
+
   currentHalf = 2;
+
+  // 1) Zavři aktuální drive jako 'halftime' (jen pokud měl alespoň 1 play; TD už jsou v historii)
+  if (state.currentDrive && state.currentDrive.plays > 0) {
+    state.drives.push({
+      team:        state.currentDrive.team || state.possession,
+      result:      'halftime',
+      plays:       state.currentDrive.plays,
+      startBall:   state.currentDrive.startBall ?? state.ball,
+      endBall:     state.ball,
+      xpScored:    0,
+      xpAttempted: 0
+    });
+  }
+
+  // 2) Flip possession — soupeř na příjmu v 2. poločase
+  const newPoss = state.possession === 'A' ? 'B' : 'A';
+  state.possession   = newPoss;
+  state.ball         = 5;
+  state.down         = 1;
+  state.firstDownAt  = 25;
+  state.currentDrive = { team: newPoss, plays: 0, startBall: 5 };
+
+  // 3) Reset timeouty
   state.teams.A.timeouts = [true, true];
   state.teams.B.timeouts = [true, true];
+
+  // 4) UI sync (mirror flipPossession)
+  const setCls = (id, cls) => { const el = document.getElementById(id); if (el) el.className = cls; };
+  const setDisp = (id, v)  => { const el = document.getElementById(id); if (el) el.style.display = v; };
+  const setText = (id, t)  => { const el = document.getElementById(id); if (el) el.textContent = t; };
+  setCls('tbtn-a',       'team-btn'       + (newPoss==='A'?' active':''));
+  setCls('tbtn-b',       'team-btn'       + (newPoss==='B'?' active':''));
+  setDisp('ball-ind-a',  newPoss==='A' ? 'inline' : 'none');
+  setDisp('ball-ind-b',  newPoss==='B' ? 'inline' : 'none');
+  setCls('score-team-a', 'team-score clickable' + (newPoss==='A'?' active':''));
+  setCls('score-team-b', 'team-score clickable' + (newPoss==='B'?' active':''));
+  setText('offense-label', state.teams[newPoss].name + ' · NA ÚTOKU');
   updateTimeoutDots();
-  showToast('2. poločas zahájen — timeouty resetovány');
+  updateFieldDisplay();
+  resetPlay();
+
+  showToast('2. poločas — ' + state.teams[newPoss].name + ' na příjmu');
   closeStats();
 }
 
@@ -2872,7 +3020,7 @@ function buildMatchPayload() {
 function saveMatchToSheets(onDone, prebuiltPayload) {
   const url = getScriptUrl();
   if (!url) {
-    showToast('⚠ Nastav Apps Script URL v nastavení', 'red');
+    showToast('Nastav Apps Script URL v nastavení', 'red');
     if (onDone) onDone();
     return;
   }
@@ -2940,18 +3088,14 @@ function showToast(msg, color) {
 
 // ═══════════════ STATS PAGE — akce ═══════════════
 function renderStatsActions() {
+  const btn = (handler, color, bg, border, iconId, label) =>
+    `<button onclick="${handler}" style="padding:13px;border:${border};background:${bg};border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;color:${color};display:inline-flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-0.2px"><svg class="ic ic-sm"><use href="#${iconId}"/></svg> ${label}</button>`;
   return `
     <div class="stat-card" style="display:flex;flex-direction:column;gap:8px;">
       <div class="stat-card-title">Správa zápasu</div>
-      <button onclick="startSecondHalf()" style="padding:13px;border:1.5px solid var(--border);background:var(--surface2);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:var(--blue);">
-        🕐 Přepnout na 2. poločas
-      </button>
-      <button onclick="newMatch()" style="padding:13px;border:none;background:var(--green);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:#fff;">
-        💾 Uložit & nový zápas
-      </button>
-      <button onclick="newMatchWithoutSave()" style="padding:13px;border:1.5px solid var(--border);background:var(--surface2);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:var(--red);">
-        🗑 Nový zápas bez uložení
-      </button>
+      ${btn('startSecondHalf()',     'var(--ink)',    'var(--surface2)', '1px solid var(--border)', 'ic-clock', 'Přepnout na 2. poločas')}
+      ${btn('newMatch()',            '#FFFFFF',       'var(--signal)',   'none',                    'ic-save',  'Uložit & nový zápas')}
+      ${btn('newMatchWithoutSave()', 'var(--signal)', 'var(--surface2)', '1px solid var(--border)', 'ic-trash', 'Nový zápas bez uložení')}
     </div>
     <div class="stat-card">
       <div class="stat-card-title">Nastavení Google Sheets</div>
