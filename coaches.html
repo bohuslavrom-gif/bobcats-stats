@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bobcats — trenérská analytika</title>
+<link rel="icon" type="image/svg+xml" href="brand/playmetric-favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,6 +35,30 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+/* PlayMetric brand bar */
+.pm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: #0F1B2D;
+  border-radius: var(--radius);
+  color: #FFFFFF;
+}
+.pm-bar a { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.pm-bar img { height: 22px; width: auto; display: block; }
+.pm-bar .pm-tag {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+@media (max-width: 540px) {
+  .pm-bar .pm-tag { display: none; }
+}
 
 /* ── HERO ──────────────────────────────────────────────────────────────── */
 .hero {
@@ -316,6 +341,11 @@ body {
 <body>
 <div class="wrap">
 
+  <div class="pm-bar">
+    <a href="#" aria-label="PlayMetric"><img src="brand/playmetric-logo-horizontal-white.svg" alt="PlayMetric"></a>
+    <span class="pm-tag">Measure every play</span>
+  </div>
+
   <header class="hero">
     <div class="brand">
       <div class="logo"><img src="bobcats-logo.png" alt="Bobcats logo"></div>
@@ -333,7 +363,7 @@ body {
     <div class="loading"><div class="spinner"></div>Načítám data…</div>
   </div>
 
-  <footer class="footer">Bobcats stats · trenérská sekce</footer>
+  <footer class="footer">Bobcats stats · trenérská sekce · powered by <strong>PlayMetric</strong></footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
