@@ -64,6 +64,13 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+  /* Vypnout pull-to-refresh na Androidu (Chrome) — potah dolů na vrchu stránky
+     nesmí reloadovat appku a smazat rozdělaný zápas. */
+  html, body {
+    overscroll-behavior-y: contain;
+    overscroll-behavior-x: contain;
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
@@ -392,13 +399,34 @@
   /* Yard input */
   .yard-input-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .yard-input {
-    width: 70px; padding: 7px 10px;
+    width: 90px; padding: 7px 10px;
     background: var(--surface2); border: 1.5px solid var(--border2);
     border-radius: 8px; color: var(--text);
     font-family: 'Inter', sans-serif;
     font-size: 1.25rem; font-weight: 700; text-align: center;
   }
   .yard-input:focus { outline: none; border-color: var(--blue); }
+  .yard-actions { display: flex; gap: 6px; align-items: center; }
+  .yard-confirm-btn {
+    padding: 8px 14px;
+    background: var(--signal); color: #fff;
+    border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .yard-confirm-btn:hover { background: #C8313D; }
+  .yard-confirm-btn:active { transform: scale(0.97); }
+  .yard-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .yard-clear-btn {
+    padding: 7px 10px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text2);
+    border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+  }
+  .yard-clear-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
   .yard-quick { display: flex; gap: 5px; flex-wrap: wrap; }
   .yard-quick-btn {
     padding: 5px 8px;
@@ -407,6 +435,7 @@
     font-size: 0.75rem; font-weight: 600; border-radius: 6px; cursor: pointer;
   }
   .yard-quick-btn:hover { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+  .yard-quick-btn.active { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
 
   /* Confirm — primary CTA = Signal red */
   .confirm-btn {
@@ -555,10 +584,32 @@
   .modal-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
   .player-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
   .player-row {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 10px; padding: 9px 12px;
   }
+  .pname-input {
+    flex: 1; min-width: 120px;
+    background: transparent; border: none;
+    color: var(--text); font-family: 'Inter', sans-serif;
+    font-size: 0.92rem; font-weight: 600; padding: 4px 0;
+  }
+  .pname-input:focus { outline: none; }
+  .pos-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pos-chip {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 4px 9px; border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text3);
+    cursor: pointer; user-select: none;
+    transition: all 0.12s;
+  }
+  .pos-chip:hover { border-color: var(--text3); color: var(--text); }
+  .pos-chip.active.qb { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); }
+  .pos-chip.active.wr { background: var(--green-bg); color: var(--green-dark); border-color: var(--green); }
+  .pos-chip.active.db { background: var(--purple-bg); color: var(--purple); border-color: var(--purple); }
+  .pos-chip.active.def { background: var(--orange-bg); color: var(--orange); border-color: var(--orange); }
+  /* Legacy pos-badge (zachováno pro stats/logy) */
   .pos-badge {
     font-size: 0.68rem; font-weight: 700; padding: 3px 7px;
     border-radius: 6px; background: var(--green-bg); color: var(--green-dark);
@@ -569,19 +620,20 @@
   .pname { flex: 1; color: var(--text); font-size: 0.88rem; font-weight: 500; }
   .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 1rem; padding: 0 4px; }
   .del-btn:hover { color: var(--red); }
-  .add-player-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .add-player-row select, .add-player-row input {
+  .add-player-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .add-player-row input {
     background: var(--surface2); border: 1px solid var(--border2);
     border-radius: 8px; color: var(--text);
     font-family: 'Inter', sans-serif; font-size: 0.88rem; padding: 9px 11px;
   }
-  .add-player-row select { width: 78px; }
   .add-player-row input { flex: 1; min-width: 110px; }
   .add-player-row button {
     padding: 9px 14px; background: var(--green); border: none;
     border-radius: 8px; color: white;
     font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer;
   }
+  .add-player-row .pos-chips { gap: 6px; }
+  .add-player-hint { width: 100%; font-size: 0.72rem; color: var(--text3); margin-top: -2px; }
   .modal-footer { display: flex; gap: 8px; margin-top: 16px; }
   .modal-footer button {
     flex: 1; padding: 13px; border-radius: 12px;
@@ -1083,13 +1135,9 @@
       <input class="team-name-input" id="team-name-input" placeholder="Název týmu…" oninput="updateTeamName(this.value)" />
       <div class="player-list" id="player-list"></div>
       <div class="add-player-row">
-        <select id="new-pos">
-          <option value="QB">QB</option>
-          <option value="WR">WR</option>
-          <option value="DB">DB</option>
-        </select>
         <input id="new-name" placeholder="Jméno hráče…" onkeydown="if(event.key==='Enter')addPlayer()" />
         <button onclick="addPlayer()">+ Přidat</button>
+        <div class="add-player-hint">Pozice doplníš/změníš přímo u hráče níže (kliknutím na štítky QB / WR / DB).</div>
       </div>
     </div>
     <!-- Playbook section -->
@@ -1157,6 +1205,25 @@ const state = {
   currentDrive: { team: 'A', plays: 0, startBall: 5 },  // ongoing drive (startBall captured při zahájení)
   playbook: []  // play names for Team A
 };
+
+// ═══════════════ HRÁČSKÉ POZICE (multi-pos) ═══════════════
+// Datový model: hráč má pole `positions` (např. ['QB','WR']). Legacy formát
+// `pos: 'QB'` se transparentně podporuje — vrátí jednoprvkové pole.
+// Jakmile uživatel hráče upraví v UI, automaticky se přepíše do nového formátu.
+function playerPositions(p) {
+  if (!p) return [];
+  if (Array.isArray(p.positions) && p.positions.length) return p.positions;
+  if (p.pos) return [p.pos];
+  return [];
+}
+function playerHasPos(p, pos) {
+  return playerPositions(p).includes(pos);
+}
+// Primární pozice (pro výpis značky, exporty) — první z pole
+function playerPrimaryPos(p) {
+  const arr = playerPositions(p);
+  return arr[0] || '';
+}
 
 // ═══════════════ PENALTIES (IFAF 2026 CZ) ═══════════════
 // Zdroj: docs/pravidla.md / docs/Flag-IFAF2026CZ.pdf
@@ -1398,8 +1465,8 @@ function renderXPWizard() {
   const scoringTeam = state.teams[state.tdScoringTeam];
   const defTeamKey = state.tdScoringTeam === 'A' ? 'B' : 'A';
   const defTeam = state.teams[defTeamKey];
-  const qbs = scoringTeam.players.filter(p=>p.pos==='QB');
-  const wrs = scoringTeam.players.filter(p=>p.pos==='WR');
+  const qbs = scoringTeam.players.filter(p=>playerHasPos(p,'QB'));
+  const wrs = scoringTeam.players.filter(p=>playerHasPos(p,'WR'));
   const defAll = defTeam.players;
 
   // Build steps
@@ -1542,9 +1609,9 @@ function renderSteps() {
   const defTeam = state.teams[defTeamKey];
   const offPlayers = offTeam.players;
   const defPlayers = defTeam.players;
-  const qbs = offPlayers.filter(p=>p.pos==='QB');
-  const wrs = offPlayers.filter(p=>p.pos==='WR');
-  const dbs = defPlayers.filter(p=>p.pos==='DB');
+  const qbs = offPlayers.filter(p=>playerHasPos(p,'QB'));
+  const wrs = offPlayers.filter(p=>playerHasPos(p,'WR'));
+  const dbs = defPlayers.filter(p=>playerHasPos(p,'DB'));
   const defAll = defPlayers;
   const hasDef = defAll.length > 0;
   const hasOff = offPlayers.length > 0; // skip off player steps if attacking team has no players
@@ -1558,7 +1625,7 @@ function renderSteps() {
       { key:'runYds', label:'Počet yardů', type:'yard', vals:[-5,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,15,20] },
       ...(hasDef ? [{ key:'defType', label:`Obranný zákrok (${defTeam.name})`, options:['—','Flag Pull'] }] : []),
       ...(hasDef && sel.defType && sel.defType !== '—' ? [{ key:'defPlayer', label:'Obránce', options:['—',...defAll.map(p=>p.name)] }] : []),
-      ...(state.possession === 'A' && state.playbook.length > 0 ? [{ key:'playName', label:'Název hry', options:['—',...state.playbook] }] : []),
+      ...(state.playbook.length > 0 ? [{ key:'playName', label:'Název hry', options:['—',...state.playbook] }] : []),
     ];
   } else if (currentPlay === 'pass') {
     steps = [
@@ -1574,7 +1641,7 @@ function renderSteps() {
         if (sel.defType && sel.defType !== '—')
           steps.push({ key:'defPlayer', label:'Obránce', options:['—',...defAll.map(p=>p.name)] });
       }
-      if (state.possession === 'A' && state.playbook.length > 0)
+      if (state.playbook.length > 0)
         steps.push({ key:'playName', label:'Název hry', options:['—',...state.playbook] });
     } else if (sel.passResult === 'Nekompletní') {
       if (hasDef) {
@@ -1583,7 +1650,7 @@ function renderSteps() {
         if (sel.defType && sel.defType !== '—')
           steps.push({ key:'defPlayer', label:'Obránce', options:['—',...defAll.map(p=>p.name)] });
       }
-      if (state.possession === 'A' && state.playbook.length > 0)
+      if (state.playbook.length > 0)
         steps.push({ key:'playName', label:'Název hry', options:['—',...state.playbook] });
     } else if (sel.passResult === 'INT' || sel.passResult === 'INT-TD') {
       if (hasDef)
@@ -1596,7 +1663,7 @@ function renderSteps() {
       ...(hasOff ? [{ key:'sackQb', label:'QB (sacknutý)', options: qbs.map(p=>p.name) }] : []),
       ...(hasDef ? [{ key:'sackDef', label:`Sackoval (${defTeam.name})`, options:['—',...defAll.map(p=>p.name)] }] : []),
       { key:'sackYds', label:'Ztráta yardů', type:'yard', vals:[-15,-12,-10,-8,-7,-6,-5,-4,-3,-2,-1] },
-      ...(state.possession === 'A' && state.playbook.length > 0 ? [{ key:'playName', label:'Název hry', options:['—',...state.playbook] }] : []),
+      ...(state.playbook.length > 0 ? [{ key:'playName', label:'Název hry', options:['—',...state.playbook] }] : []),
     ];
   } else if (currentPlay === 'penalty') {
     // 1) Strana faulu  ──→ 2) filtrovaný seznam faulů ──→ 3) hráč z dané strany ──→ 4) yardáž
@@ -1663,15 +1730,19 @@ function renderSteps() {
   const allDone = currentStepIdx >= steps.length;
   const isNekompletniWithDef = currentPlay === 'pass' && sel.passResult === 'Nekompletní' &&
     (!hasDef || (sel.defType !== undefined && (sel.defType === '—' || sel.defPlayer !== undefined))) &&
-    (state.possession !== 'A' || state.playbook.length === 0 || sel.playName !== undefined);
+    (state.playbook.length === 0 || sel.playName !== undefined);
   const isNekompletniDone = isNekompletniWithDef;
 
   // Build wizard HTML
-  // Breadcrumb
-  let bcHtml = '';
+  // Breadcrumb — vždy začíná typem hry (Run/Pass/Sack/Penalty/Safety/TD), pak kroky
+  const playTypeLabel = {
+    run:'Run', pass:'Pass', sack:'Sack', penalty:'Foul',
+    safety:'Safety', td:'TD'
+  }[currentPlay] || currentPlay;
+  let bcHtml = `<span class="breadcrumb-item"><span class="bc-val" style="background:var(--blue-bg);color:var(--blue);font-weight:700">${playTypeLabel}</span></span>`;
   if (breadcrumb.length > 0) {
-    bcHtml = breadcrumb.map((b, i) =>
-      `<span class="breadcrumb-item">${i>0?'<span class="breadcrumb-sep">›</span>':''}<span class="bc-val">${b.val}</span></span>`
+    bcHtml += breadcrumb.map(b =>
+      `<span class="breadcrumb-item"><span class="breadcrumb-sep">›</span><span class="bc-val">${b.val}</span></span>`
     ).join('');
   }
 
@@ -1697,14 +1768,21 @@ function renderSteps() {
       ${stepHtml}
     </div>`;
 
-  // Attach yard input listener if needed
+  // Attach yard input listener — pouze sync z inputu do pending state, BEZ advance.
+  // Advance se děje až po stisku Potvrdit (confirmYardStep).
   if (currentStepIdx < steps.length && steps[currentStepIdx] && steps[currentStepIdx].type === 'yard') {
     const key = steps[currentStepIdx].key;
     const inp = c.querySelector(`#yard-inp-${key}`);
-    if (inp) inp.addEventListener('input', () => {
-      const v = parseInt(inp.value);
-      if (!isNaN(v)) { sel[key] = v; renderSteps(); }
-    });
+    if (inp) {
+      inp.addEventListener('input', () => {
+        yardPending[key] = inp.value;
+        updateYardConfirmState(key);
+      });
+      // Enter v inputu = potvrdit
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); confirmYardStep(key); }
+      });
+    }
   }
 }
 
@@ -1724,18 +1802,51 @@ function buildChoiceStep(step) {
   </div>`;
 }
 
+// Pending yardáž — drží rozepsanou hodnotu v inputu, NEzapisuje se do sel
+// dokud uživatel neklikne Potvrdit. Umožňuje napsat dvouciferné číslo bez
+// auto-confirmu po první číslici.
+let yardPending = {};
+
 function buildYardStep(step) {
-  const val = sel[step.key] !== undefined ? sel[step.key] : '';
-  const btns = step.vals.map(v =>
-    `<button class="yard-quick-btn" onclick="wizardYard('${step.key}',${v})">${v>=0?'+':''}${v}</button>`
-  ).join('');
+  // Priorita: rozepsaná hodnota > již potvrzená sel hodnota > prázdno
+  const initial = (yardPending[step.key] !== undefined && yardPending[step.key] !== '')
+    ? yardPending[step.key]
+    : (sel[step.key] !== undefined ? sel[step.key] : '');
+  if (yardPending[step.key] === undefined && sel[step.key] !== undefined) {
+    yardPending[step.key] = String(sel[step.key]);
+  }
+  const btns = step.vals.map(v => {
+    const isActive = String(initial) === String(v);
+    return `<button class="yard-quick-btn${isActive?' active':''}" onclick="wizardYardSet('${step.key}',${v})">${v>=0?'+':''}${v}</button>`;
+  }).join('');
+  const canConfirm = initial !== '' && !isNaN(parseInt(initial));
   return `<div class="wizard-step">
     <div class="step-label">${step.label}</div>
     <div class="yard-input-wrap">
-      <input type="number" class="yard-input" id="yard-inp-${step.key}" value="${val}" placeholder="0" />
+      <input type="number" inputmode="numeric" class="yard-input" id="yard-inp-${step.key}" value="${initial}" placeholder="0" />
+      <div class="yard-actions">
+        <button class="yard-clear-btn" onclick="wizardYardClear('${step.key}')" type="button">Smazat</button>
+        <button class="yard-confirm-btn" id="yard-ok-${step.key}" onclick="confirmYardStep('${step.key}')" type="button" ${canConfirm?'':'disabled'}>
+          <svg class="ic ic-sm"><use href="#ic-check"/></svg> Potvrdit
+        </button>
+      </div>
       <div class="yard-quick">${btns}</div>
     </div>
   </div>`;
+}
+
+// Aktualizuje stav Potvrdit tlačítka podle obsahu inputu (bez re-renderu wizardu)
+function updateYardConfirmState(key) {
+  const inp = document.getElementById(`yard-inp-${key}`);
+  const btn = document.getElementById(`yard-ok-${key}`);
+  if (!inp || !btn) return;
+  const v = inp.value;
+  const ok = v !== '' && !isNaN(parseInt(v));
+  btn.disabled = !ok;
+  // sync active state quick buttons
+  document.querySelectorAll(`.yard-quick-btn`).forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().replace('+','') === String(parseInt(v)));
+  });
 }
 
 function wizardSelect(key, val) {
@@ -1743,6 +1854,35 @@ function wizardSelect(key, val) {
   renderSteps();
 }
 
+// Quick tlačítko — SET hodnoty do inputu, ALE nezavolá renderSteps (žádný auto-advance).
+// Uživatel musí kliknout Potvrdit.
+function wizardYardSet(key, val) {
+  yardPending[key] = String(val);
+  const inp = document.getElementById(`yard-inp-${key}`);
+  if (inp) inp.value = val;
+  updateYardConfirmState(key);
+}
+
+// Smazat — vyprázdní input pro nový pokus
+function wizardYardClear(key) {
+  yardPending[key] = '';
+  const inp = document.getElementById(`yard-inp-${key}`);
+  if (inp) { inp.value = ''; inp.focus(); }
+  updateYardConfirmState(key);
+}
+
+// Potvrdit — zapíše hodnotu z inputu do sel a posune wizard dál
+function confirmYardStep(key) {
+  const inp = document.getElementById(`yard-inp-${key}`);
+  const raw = inp ? inp.value : (yardPending[key] || '');
+  const v = parseInt(raw);
+  if (isNaN(v)) return;
+  sel[key] = v;
+  delete yardPending[key];
+  renderSteps();
+}
+
+// Legacy alias — pro případ že kdekoliv jinde se ještě volá wizardYard
 function wizardYard(key, val) {
   sel[key] = val;
   renderSteps();
@@ -1935,13 +2075,15 @@ function confirmPlay() {
 }
 
 function resetPlay() {
-  currentPlay=null; sel={};
+  currentPlay=null; sel={}; yardPending={};
   document.querySelectorAll('.play-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('steps-container').innerHTML='';
 }
 
 // ═══════════════ LOG ═══════════════
 function renderLog() {
+  // Autosave hook — renderLog se volá po každé akci, která mění playLog
+  if (typeof scheduleAutosave === 'function') scheduleAutosave();
   const log = document.getElementById('play-log');
   if (state.playLog.length===0) { log.innerHTML='<div class="empty-log">Zatím žádná hra…</div>'; return; }
   const badgeLabel = {run:'Rush',run_td:'Rush TD',pass:'Pass',pass_td:'Pass TD',sack:'Sack',penalty:'Foul',safety:'Safety',td:'TD',inttd:'INT-TD',xp1:'+1 XP',xp2:'+2 XP',xp0:'XP fail'};
@@ -1981,16 +2123,54 @@ function switchPlayerTab(t) {
   document.getElementById('players-modal-title').textContent = t==='PB' ? 'Playbook' : 'Správa hráčů';
   if (t==='PB') renderPlaybookList(); else renderPlayerList();
 }
+const POS_OPTIONS = ['QB','WR','DB'];
+
 function renderPlayerList() {
   const team=state.teams[playerTab];
   document.getElementById('team-name-input').value=team.name;
   const list=document.getElementById('player-list');
-  list.innerHTML=team.players.map((p,i)=>`
-    <div class="player-row">
-      <span class="pos-badge ${p.pos.toLowerCase()}">${p.pos}</span>
-      <span class="pname">${p.name}</span>
-      <button class="del-btn" onclick="removePlayer(${i})">✕</button>
-    </div>`).join('')||'<div style="color:var(--text3);font-size:0.82rem;padding:8px">Žádní hráči</div>';
+  if (team.players.length === 0) {
+    list.innerHTML = '<div style="color:var(--text3);font-size:0.82rem;padding:8px">Žádní hráči</div>';
+    return;
+  }
+  list.innerHTML = team.players.map((p,i) => {
+    const posSet = playerPositions(p);
+    const chips = POS_OPTIONS.map(pos => {
+      const on = posSet.includes(pos);
+      return `<button type="button" class="pos-chip ${pos.toLowerCase()}${on?' active':''}" onclick="togglePlayerPos(${i},'${pos}')">${pos}</button>`;
+    }).join('');
+    const safeName = (p.name || '').replace(/"/g, '&quot;');
+    return `
+      <div class="player-row">
+        <input class="pname-input" value="${safeName}" placeholder="Jméno…"
+               onchange="renamePlayer(${i}, this.value)" />
+        <div class="pos-chips">${chips}</div>
+        <button class="del-btn" onclick="removePlayer(${i})" title="Smazat">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function togglePlayerPos(i, pos) {
+  const team = state.teams[playerTab];
+  const p = team.players[i];
+  if (!p) return;
+  // Migrace na nový model + toggle
+  let cur = playerPositions(p).slice();
+  if (cur.includes(pos)) cur = cur.filter(x => x !== pos);
+  else cur.push(pos);
+  p.positions = cur;
+  // Pro backward kompat (export do Sheets, statistiky čtoucí p.pos)
+  p.pos = cur[0] || '';
+  // Smaž starý jednoduchý 'pos' jen pokud nemá nic
+  renderPlayerList();
+  savePlayersToStorage();
+}
+
+function renamePlayer(i, val) {
+  const v = (val || '').trim();
+  if (!v) return;
+  state.teams[playerTab].players[i].name = v;
+  savePlayersToStorage();
 }
 function renderPlaybookList() {
   const list = document.getElementById('playbook-list');
@@ -2506,6 +2686,70 @@ const LS_PLAYBOOK = 'ff_playbook_v1';    // legacy (jen pro migraci)
 const LS_SETTINGS = 'ff_settings_v1';
 const LS_PROFILES = 'ff_profiles_v1';    // nové: { profiles: { [name]: {players, playbook} }, active: 'name' }
 const LS_OPPONENT = 'ff_opponent_v1';    // soupeř (název + hráči) — odděleně od profilu, mění se per zápas
+const LS_GAME     = 'ff_game_v1';        // autosave rozdělaného zápasu (state snapshot)
+
+// ── Autosave rozdělaného zápasu ─────────────────────────────────────────
+// Pojistka proti Android pull-to-refresh + neúmyslnému zavření tabu.
+// Ukládá kompletní state minus drives history (ten se ukládá zvlášť pro export).
+let _autosaveTimer = null;
+function saveGameState() {
+  try {
+    // Klonujeme state, abychom mohli oříznout playLog (snapy v něm jsou těžké)
+    const snapshot = {
+      teams:      state.teams,
+      possession: state.possession,
+      ball:       state.ball,
+      firstDownAt:state.firstDownAt,
+      down:       state.down,
+      playLog:    state.playLog,
+      awaitingExtraPoint: state.awaitingExtraPoint,
+      tdScoringTeam: state.tdScoringTeam,
+      drives:     state.drives,
+      currentDrive: state.currentDrive,
+      playbook:   state.playbook,
+      _savedAt:   Date.now()
+    };
+    localStorage.setItem(LS_GAME, JSON.stringify(snapshot));
+  } catch(e) {
+    // localStorage quota / serialization fail — tichá výjimka, abychom neshazovali UI
+    console.warn('saveGameState:', e);
+  }
+}
+function scheduleAutosave() {
+  // Debounce: ulož maximálně 1× za 800ms, abychom neházeli do storage při každé interakci
+  if (_autosaveTimer) clearTimeout(_autosaveTimer);
+  _autosaveTimer = setTimeout(saveGameState, 800);
+}
+function loadGameState() {
+  try {
+    const raw = localStorage.getItem(LS_GAME);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (!s || !s.teams) return false;
+    // Heuristika: má smysl obnovit jen pokud byl rozehraný zápas (alespoň 1 hra v logu nebo skóre)
+    const hasPlays  = Array.isArray(s.playLog) && s.playLog.length > 0;
+    const hasScore  = (s.teams?.A?.score || 0) > 0 || (s.teams?.B?.score || 0) > 0;
+    if (!hasPlays && !hasScore) return false;
+    // Restore
+    Object.assign(state, s);
+    return true;
+  } catch(e) {
+    console.warn('loadGameState:', e);
+    return false;
+  }
+}
+function clearGameState() {
+  try { localStorage.removeItem(LS_GAME); } catch(e) {}
+}
+// Hook na zavírání tabu — flush autosave (synchronní)
+window.addEventListener('beforeunload', () => {
+  if (_autosaveTimer) { clearTimeout(_autosaveTimer); }
+  saveGameState();
+});
+// Hook na background tab (Android Chrome triggeruje při pulldown reload taky)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveGameState();
+});
 
 // ── Profile helpers ──────────────────────────────────────────────────────
 function getProfilesData() {
@@ -2699,13 +2943,15 @@ function saveSettings() {
 
 // ── Player / Playbook handlers ───────────────────────────────────────────
 function addPlayer() {
-  const pos  = document.getElementById('new-pos').value;
   const name = document.getElementById('new-name').value.trim();
   if (!name) return;
-  state.teams[playerTab].players.push({ pos, name });
+  // Nový hráč bez pozic — uživatel pozice přepne klikáním na štítky.
+  // Pro backward compat držíme i pole 'pos' (prázdné).
+  state.teams[playerTab].players.push({ name, positions: [], pos: '' });
   document.getElementById('new-name').value = '';
   renderPlayerList();
   savePlayersToStorage();
+  document.getElementById('new-name').focus();
 }
 function removePlayer(i) {
   state.teams[playerTab].players.splice(i, 1);
@@ -2808,6 +3054,9 @@ function newMatch() {
   resetPlay(); renderLog(); updateFieldDisplay();
   closeStats();
 
+  // Smazat autosave snapshot — nový zápas začíná čistě
+  clearGameState();
+
   showToast('Nový zápas zahájen — ukládám do Sheets...');
   saveMatchToSheets(() => {}, payload);
 }
@@ -2824,6 +3073,7 @@ function newMatchWithoutSave() {
   currentHalf = 1;
   resetPlay(); renderLog(); updateFieldDisplay();
   closeStats();
+  clearGameState();
   showToast('Nový zápas zahájen');
 }
 
@@ -2994,7 +3244,8 @@ function buildMatchPayload() {
     drives: drivesPayload,          // breakdown pro list "[Tým] - Drives"
     roster: state.teams.A.players.map(p => ({   // pro list "[Tým] - Roster"
       name: p.name || '',
-      pos:  p.pos  || '',
+      pos:  playerPrimaryPos(p),                  // primary pozice (zpětná kompat)
+      positions: playerPositions(p),              // všechny pozice (multi-pos)
       jersey: p.jersey || p.number || '',
       photoUrl: p.photoUrl || ''
     })),
@@ -3113,7 +3364,31 @@ function renderStatsActions() {
 }
 
 // ═══════════════ INIT ═══════════════
+// Build: 2026-05-14 fixes (yardy, off-hra, soupiska multi-pos, pull-to-refresh)
 loadPlayersFromStorage();
+// Pojistka proti Android pull-to-refresh + neúmyslnému zavření tabu:
+// Pokud existuje rozdělaný zápas v localStorage, obnov ho.
+const _restored = loadGameState();
+if (_restored) {
+  // Sync UI prvky podle obnoveného stavu
+  try {
+    const setCls = (id, cls) => { const el = document.getElementById(id); if (el) el.className = cls; };
+    const setDisp = (id, v)  => { const el = document.getElementById(id); if (el) el.style.display = v; };
+    const setText = (id, t)  => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    setCls('tbtn-a',       'team-btn' + (state.possession==='A'?' active':''));
+    setCls('tbtn-b',       'team-btn' + (state.possession==='B'?' active':''));
+    setDisp('ball-ind-a',  state.possession==='A' ? 'inline' : 'none');
+    setDisp('ball-ind-b',  state.possession==='B' ? 'inline' : 'none');
+    setCls('score-team-a', 'team-score clickable' + (state.possession==='A'?' active':''));
+    setCls('score-team-b', 'team-score clickable' + (state.possession==='B'?' active':''));
+    setText('offense-label', state.teams[state.possession].name + ' · NA ÚTOKU');
+    setText('ptab-a', state.teams.A.name);
+    setText('ptab-b', state.teams.B.name);
+    if (typeof updateTimeoutDots === 'function') updateTimeoutDots();
+    if (typeof renderLog === 'function') renderLog();
+    showToast('Obnoven rozdělaný zápas ✓');
+  } catch(e) { console.warn('restore UI sync:', e); }
+}
 updateFieldDisplay();
 </script>
 </body>
