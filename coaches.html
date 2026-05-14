@@ -293,6 +293,137 @@ body {
 
 .chart-wrap { position: relative; width: 100%; height: 220px; }
 
+/* ── DOWN DISTRIBUCE — stacked bar (short/medium/long per down) ─────── */
+.dd-legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 14px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.dd-legend .item { display: inline-flex; align-items: center; gap: 6px; }
+.dd-legend .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.dd-swatch-short  { background: #C5CCD3; }
+.dd-swatch-medium { background: #185FA5; }
+.dd-swatch-long   { background: var(--red); }
+
+.dd-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 60px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dd-row:last-child { border-bottom: none; }
+.dd-row .dd-label {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.dd-row .dd-label .dd-down {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  letter-spacing: -0.01em;
+}
+.dd-row .dd-label .dd-pct {
+  font-size: 11px; color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.dd-stack {
+  display: flex; height: 22px; border-radius: 5px;
+  overflow: hidden; background: var(--surface-alt);
+}
+.dd-seg {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  min-width: 0;
+  transition: flex 0.25s;
+  letter-spacing: -0.01em;
+}
+.dd-seg.short  { background: #8B95A0; color: #fff; }
+.dd-seg.medium { background: #185FA5; }
+.dd-seg.long   { background: var(--red); }
+.dd-seg.empty  { background: transparent; }
+.dd-row .dd-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+.dd-row .dd-count .dd-count-sub {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-subtle);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── PLAYBOOK AKCE — card grid ─────────────────────────────────────── */
+.pb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.pb-item {
+  display: flex; flex-direction: column;
+  padding: 12px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  gap: 6px;
+  transition: border-color 0.15s;
+}
+.pb-item:hover { border-color: var(--red); }
+.pb-item .pb-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+}
+.pb-item .pb-name {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pb-item .pb-count {
+  font-size: 11px; font-weight: 700;
+  color: var(--red);
+  background: var(--red-soft);
+  padding: 2px 7px; border-radius: 4px;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.pb-item .pb-stats {
+  display: flex; gap: 12px; align-items: baseline;
+  font-size: 12px; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.pb-item .pb-yd-main {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.02em;
+}
+.pb-item .pb-yd-main .unit {
+  font-size: 11px; font-weight: 500; color: var(--text-subtle);
+  margin-left: 2px;
+}
+.pb-item .pb-divider {
+  width: 1px; height: 18px; background: var(--border);
+  flex-shrink: 0;
+}
+.pb-item .pb-avg { color: var(--text-muted); font-weight: 500; }
+.pb-item .pb-td-badge {
+  font-size: 10px; font-weight: 700;
+  background: #185FA5; color: #fff;
+  padding: 2px 6px; border-radius: 3px;
+  margin-left: auto;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.pb-item .pb-bar {
+  height: 4px; background: var(--surface); border-radius: 2px;
+  overflow: hidden; margin-top: 4px;
+}
+.pb-item .pb-bar .pb-bar-fill {
+  height: 100%; background: var(--red);
+  border-radius: 2px;
+}
+
 .legend-inline {
   display: flex; gap: 16px;
   font-size: 11px; color: var(--text-muted);
@@ -535,7 +666,16 @@ function renderOff(s) {
 
 function renderDownDist(dd) {
   if (!dd) return '';
-  const total = (dd[1]||0) + (dd[2]||0) + (dd[3]||0) + (dd[4]||0);
+  // Normalizace: může přijít buď nový formát {total,short,medium,long,...} nebo legacy {number}
+  function asBreakdown(v) {
+    if (v == null) return { total:0, short:0, medium:0, long:0 };
+    if (typeof v === 'number') return { total:v, short:0, medium:0, long:0, _legacy:true };
+    return { total:v.total||0, short:v.short||0, medium:v.medium||0, long:v.long||0,
+             sumYds: v.sumYds||0, td: v.td||0 };
+  }
+  const downs = { 1: asBreakdown(dd[1]), 2: asBreakdown(dd[2]),
+                  3: asBreakdown(dd[3]), 4: asBreakdown(dd[4]) };
+  const total = downs[1].total + downs[2].total + downs[3].total + downs[4].total;
   if (total === 0) {
     return `
       <div class="card">
@@ -543,24 +683,52 @@ function renderDownDist(dd) {
         <div class="empty">Zatím žádná per-play data v této sezóně. Po novém uložení zápasu se začnou plnit.</div>
       </div>`;
   }
-  // Bar chart per down (1st, 2nd, 3rd, 4th)
-  const max = Math.max(1, dd[1]||0, dd[2]||0, dd[3]||0, dd[4]||0);
+  const isLegacy = !!downs[1]._legacy;
+  const maxCount = Math.max(1, downs[1].total, downs[2].total, downs[3].total, downs[4].total);
+
   const rows = [1, 2, 3, 4].map(d => {
-    const c = dd[d] || 0;
-    const pct = total ? Math.round(c/total*100) : 0;
+    const b = downs[d];
+    const pct = total ? Math.round(b.total/total*100) : 0;
+    // Šířka stack baru relativně k nejpočetnějšímu downu
+    const widthPct = (b.total / maxCount * 100).toFixed(1);
+    let stackInner;
+    if (isLegacy || b.total === 0) {
+      // Backward compat: starý formát neumí short/medium/long — ukáž plný šedý bar
+      stackInner = `<div class="dd-seg short" style="flex:1">${b.total || ''}</div>`;
+    } else {
+      const sh = b.short, md = b.medium, lg = b.long;
+      const seg = (cnt, cls) => cnt > 0
+        ? `<div class="dd-seg ${cls}" style="flex:${cnt}" title="${cls}: ${cnt} plays">${cnt}</div>`
+        : '';
+      stackInner = seg(sh, 'short') + seg(md, 'medium') + seg(lg, 'long');
+    }
     return `
-      <div class="bar-row">
-        <span class="label">${d}. down <span style="color:var(--text-subtle);font-weight:400;margin-left:4px">${pct}%</span></span>
-        <span class="bar-vis">
-          <span class="bar-wrap"><span class="bar" style="width:${(c/max*100).toFixed(0)}%"></span></span>
-          <span class="bar-val">${c}</span>
-        </span>
+      <div class="dd-row">
+        <div class="dd-label">
+          <span class="dd-down">${d}. down</span>
+          <span class="dd-pct">${pct}% celku</span>
+        </div>
+        <div class="dd-stack" style="width:${widthPct}%; min-width:${b.total ? '40px':'0'}">${stackInner}</div>
+        <div class="dd-count">${b.total}<span class="dd-count-sub">plays</span></div>
       </div>`;
   }).join('');
+
+  const legend = isLegacy ? '' : `
+    <div class="dd-legend">
+      <span class="item"><span class="swatch dd-swatch-short"></span>Krátké (0–7 yd)</span>
+      <span class="item"><span class="swatch dd-swatch-medium"></span>Střední (8–15 yd)</span>
+      <span class="item"><span class="swatch dd-swatch-long"></span>Dlouhé (16+ yd)</span>
+    </div>`;
+  const hint = isLegacy
+    ? `<div style="font-size:11px;color:var(--text-subtle);margin-top:10px">Pro rozdělení short/medium/long aktualizuj Apps Script backend (v18).</div>`
+    : '';
+
   return `
     <div class="card">
       <div class="card-title"><h3>Down distribuce</h3><span class="meta">${total} útočných plays</span></div>
+      ${legend}
       ${rows}
+      ${hint}
     </div>`;
 }
 
@@ -574,21 +742,39 @@ function renderPlaybook(akce) {
         </div>
       </div>`;
   }
-  const max = Math.max(1, ...akce.map(a => a.count));
-  const rows = akce.map(a => `
-    <div class="bar-row">
-      <span class="label">${escapeHTML(a.name)}
-        <span style="color:var(--text-subtle);font-weight:400;margin-left:6px">${a.totalYds} yd · avg ${a.avgYds}${a.td ? ' · ' + a.td + ' TD' : ''}</span>
-      </span>
-      <span class="bar-vis">
-        <span class="bar-wrap"><span class="bar" style="width:${(a.count/max*100).toFixed(0)}%"></span></span>
-        <span class="bar-val">${a.count}×</span>
-      </span>
-    </div>`).join('');
+  // Seřadit podle počtu použití (nejvíce → nejméně)
+  const sorted = [...akce].sort((a, b) => b.count - a.count);
+  const maxCount = Math.max(1, ...sorted.map(a => a.count));
+
+  const cards = sorted.map(a => {
+    const totalYds = a.totalYds || 0;
+    const avgYds = a.avgYds || 0;
+    const td = a.td || 0;
+    const tdBadge = td > 0
+      ? `<span class="pb-td-badge">${td} TD</span>`
+      : '';
+    const fillPct = (a.count / maxCount * 100).toFixed(0);
+    const sign = totalYds >= 0 ? '+' : '';
+    return `
+      <div class="pb-item">
+        <div class="pb-head">
+          <span class="pb-name" title="${escapeAttr(a.name)}">${escapeHTML(a.name)}</span>
+          <span class="pb-count">${a.count}× použito</span>
+        </div>
+        <div class="pb-stats">
+          <span class="pb-yd-main">${sign}${totalYds}<span class="unit">yd</span></span>
+          <span class="pb-divider"></span>
+          <span class="pb-avg">ø ${avgYds} yd/play</span>
+          ${tdBadge}
+        </div>
+        <div class="pb-bar"><div class="pb-bar-fill" style="width:${fillPct}%"></div></div>
+      </div>`;
+  }).join('');
+
   return `
     <div class="card">
-      <div class="card-title"><h3>Playbook akce</h3><span class="meta">${akce.length} různých akcí</span></div>
-      ${rows}
+      <div class="card-title"><h3>Playbook akce</h3><span class="meta">${sorted.length} různých akcí</span></div>
+      <div class="pb-grid">${cards}</div>
     </div>`;
 }
 
@@ -690,6 +876,165 @@ function renderCommon() {
         <div class="drv-result"><div class="v">${dr.safety || 0}</div><div class="l">Safety</div></div>
         <div class="drv-result"><div class="v">${(dr.halftime||0)+(dr.eog||0)+(dr.turnover||0)+(dr.other||0)}</div><div class="l">Ostatní</div></div>
       </div>
+      <div class="field" aria-hidden="true">
+        <div class="endzone-l"></div><div class="endzone-r"></div><div class="midline"></div>
+        ${DATA.endPositions.map(b => `<div class="dot" style="left:${(b/50*100).toFixed(1)}%"></div>`).join('')}
+      </div>
+      <div class="field-cap"><span>Vlastní endzone</span><span>Středová čára</span><span>Soupeřova endzone</span></div>
+    </div>`;
+
+  // Fauly breakdown
+  const faulMax = Math.max(1, ...DATA.faulyBreakdown.map(f => f.count));
+  const faulRows = DATA.faulyBreakdown.map(f => {
+    const sideClass = f.side === 'Útok' ? 'off' : f.side === 'Obrana' ? 'def' : 'both';
+    return `
+      <div class="bar-row">
+        <span class="label">${escapeHTML(f.name)}<span class="side ${sideClass}">${escapeHTML(f.side || '—')}</span></span>
+        <span class="bar-vis">
+          <span class="bar-wrap"><span class="bar ${sideClass}" style="width:${(f.count/faulMax*100).toFixed(0)}%"></span></span>
+          <span class="bar-val">${f.count}</span>
+        </span>
+      </div>`;
+  }).join('');
+
+  const faulHTML = `
+    <div class="card">
+      <div class="card-title"><h3>Fauly podle typu</h3><span class="meta">strana faulu</span></div>
+      ${DATA.faulyBreakdown.length === 0 ? '<div class="empty">Žádné fauly v sezóně.</div>' : `
+        <div class="legend-inline">
+          <span><span class="swatch" style="background:var(--red)"></span>Útok</span>
+          <span><span class="swatch" style="background:var(--black)"></span>Obrana</span>
+          <span><span class="swatch" style="background:#185FA5"></span>Oba</span>
+        </div>
+        ${faulRows}`}
+    </div>`;
+
+  // Match log
+  const matchRows = DATA.matchLog.slice().reverse().map(m => `
+    <tr>
+      <td class="opp">${escapeHTML(m.opponent)}<span class="date"> · ${escapeHTML(m.date)}</span></td>
+      <td class="num">${m.ourScore}–${m.oppScore}</td>
+      <td class="num">${m.offDrives}</td>
+      <td class="num">${m.tdPct}%</td>
+      <td class="num">${m.passYds}</td>
+      <td class="num">${m.rushYds}</td>
+      <td class="num">${m.penCount} (${m.penYds}y)</td>
+      <td><span class="badge ${m.result === 'W' ? 'w' : m.result === 'L' ? 'l' : 't'}">${m.result}</span></td>
+    </tr>
+  `).join('');
+
+  const logHTML = DATA.matchLog.length === 0 ? '' : `
+    <div class="card lb">
+      <div class="card-title"><h3>Match log</h3><span class="meta">${DATA.matchCount} zápasů</span></div>
+      <table>
+        <thead><tr><th>Zápas</th><th class="num">Skóre</th><th class="num">Drives</th><th class="num">TD %</th><th class="num">Pass Y</th><th class="num">Rush Y</th><th class="num">Fauly</th><th></th></tr></thead>
+        <tbody>${matchRows}</tbody>
+      </table>
+    </div>`;
+
+  return drvHTML + faulHTML + logHTML;
+}
+
+// ============================================================
+//  RENDER ROOT
+// ============================================================
+function renderAll() {
+  const stats = aggregateForScope();
+  if (!stats) {
+    document.getElementById('content').innerHTML = emptyState('Pro tento tým zatím nejsou žádná data.');
+    return;
+  }
+
+  // Controls bar (period picker + tabs)
+  const matchOptions = DATA.matchLog.map(m =>
+    `<option value="${m.idx}"${String(m.idx) === SCOPE ? ' selected' : ''}>${escapeHTML(m.opponent)} · ${escapeHTML(m.date)}</option>`
+  ).join('');
+
+  const controlsHTML = `
+    <div class="controls">
+      <div class="tabs" role="tablist">
+        <button class="tab ${SIDE === 'off' ? 'active' : ''}" data-side="off">Útok</button>
+        <button class="tab ${SIDE === 'def' ? 'active' : ''}" data-side="def">Obrana</button>
+      </div>
+      <div class="scope">
+        <label for="scope-select">Rozsah</label>
+        <select id="scope-select">
+          <option value="all"${SCOPE === 'all' ? ' selected' : ''}>Celá sezóna</option>
+          ${matchOptions}
+        </select>
+      </div>
+    </div>`;
+
+  const sideHTML = SIDE === 'off' ? renderOff(stats) : renderDef(stats);
+
+  document.getElementById('content').innerHTML = controlsHTML + sideHTML + renderCommon();
+
+  // Event handlery
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => { SIDE = btn.dataset.side; renderAll(); });
+  });
+  document.getElementById('scope-select').addEventListener('change', e => {
+    SCOPE = e.target.value;
+    renderAll();
+  });
+
+  document.getElementById('hero-sub').textContent = `Trenérská analytika · ${CURRENT_TEAM}`;
+}
+
+// ============================================================
+//  Init
+// ============================================================
+async function loadTeams() {
+  try {
+    const res = await jsonp({ action: 'getTeams' });
+    return (res && res.teams) || [];
+  } catch (e) {
+    console.error('getTeams failed:', e);
+    return [];
+  }
+}
+
+async function loadAndRender(team) {
+  CURRENT_TEAM = team;
+  document.getElementById('content').innerHTML = `<div class="loading"><div class="spinner"></div>Načítám data…</div>`;
+  try {
+    DATA = await jsonp({ action: 'coachStats', team });
+    renderAll();
+  } catch (e) {
+    console.error('coachStats failed:', e);
+    document.getElementById('content').innerHTML = `
+      <div class="card"><div class="empty"><span class="ico">⚠</span>
+        Nepodařilo se načíst data.<br>
+        <small style="color:var(--text-subtle)">${escapeHTML(e.message)}</small>
+      </div></div>`;
+  }
+}
+
+(async () => {
+  const teams = await loadTeams();
+  const picker = document.getElementById('team-picker');
+  if (teams.length === 0) {
+    picker.style.display = 'none';
+    document.getElementById('content').innerHTML = emptyState('Zatím žádné týmy v databázi.');
+    return;
+  }
+  picker.innerHTML = teams.map(t => `<option value="${escapeAttr(t)}">${escapeHTML(t)}</option>`).join('');
+  const fromUrl = new URLSearchParams(window.location.search).get('team');
+  const initial = fromUrl && teams.includes(fromUrl) ? fromUrl : teams[0];
+  picker.value = initial;
+  if (teams.length === 1) picker.style.display = 'none';
+  picker.addEventListener('change', () => {
+    SIDE = 'off'; SCOPE = 'all';
+    loadAndRender(picker.value);
+    const u = new URL(window.location.href);
+    u.searchParams.set('team', picker.value);
+    history.replaceState(null, '', u.toString());
+  });
+  loadAndRender(initial);
+})();
+</script>
+</body>
+</html>
       <div class="field" aria-hidden="true">
         <div class="endzone-l"></div><div class="endzone-r"></div><div class="midline"></div>
         ${DATA.endPositions.map(b => `<div class="dot" style="left:${(b/50*100).toFixed(1)}%"></div>`).join('')}
