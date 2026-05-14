@@ -1,6 +1,6 @@
 {
-  "name": "PlayMetric",
-  "short_name": "PlayMetric",
+  "name": "GameStatiq",
+  "short_name": "GameStatiq",
   "description": "Sport stats — measure every play",
   "start_url": "./app.html",
   "scope": "./",
@@ -11,13 +11,13 @@
   "lang": "cs",
   "icons": [
     {
-      "src": "brand/playmetric-app-icon.svg",
+      "src": "brand/gamestatiq-app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "brand/playmetric-app-icon.svg",
+      "src": "brand/gamestatiq-app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
