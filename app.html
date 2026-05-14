@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PlayMetric">
+<meta name="apple-mobile-web-app-title" content="GameStatiq">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0F1B2D">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="brand/playmetric-app-icon.svg">
-<link rel="icon" type="image/svg+xml" href="brand/playmetric-favicon.svg">
-<title>PlayMetric</title>
+<link rel="apple-touch-icon" href="brand/gamestatiq-app-icon.svg">
+<link rel="icon" type="image/svg+xml" href="brand/gamestatiq-favicon.svg">
+<title>GameStatiq</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
   :root {
-    /* PlayMetric — light app shell */
+    /* GameStatiq — light app shell */
     --ink: #0F1B2D;          /* Primary brand, headlines, scoreboard */
     --signal: #E63946;       /* CTA / negative actions / red highlights */
     --pearl: #FFFFFF;
@@ -72,7 +72,7 @@
     font-size: 15px;
   }
 
-  /* PlayMetric brand strip — slim header above scoreboard */
+  /* GameStatiq brand strip — slim header above scoreboard */
   .pm-strip {
     background: var(--ink);
     color: rgba(255, 255, 255, 0.7);
@@ -188,19 +188,20 @@
   .top-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); color: #FFFFFF; }
   .top-btn .ic { width: 18px; height: 18px; }
 
-  /* OFFENSE BAR */
+  /* OFFENSE BAR — Sky tint, Ink text (brand "active" state) */
   .offense-bar {
-    background: var(--green-bg);
-    border-bottom: 1px solid rgba(52,199,89,0.2);
-    padding: 5px 16px;
+    background: #EAF3F9;
+    border-bottom: 1px solid rgba(122, 181, 217, 0.4);
+    padding: 6px 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--green-dark);
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.04em;
   }
-  .offense-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .offense-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sky); box-shadow: 0 0 0 3px rgba(122, 181, 217, 0.25); }
 
   /* STATUS CARD */
   .status-card {
@@ -319,9 +320,9 @@
     box-shadow: var(--shadow-sm);
   }
   .team-btn.active {
-    border-color: var(--green);
-    background: var(--green-bg);
-    color: var(--green-dark);
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #FFFFFF;
   }
 
   /* Play cards — flat refined */
@@ -938,11 +939,11 @@
   </defs>
 </svg>
 
-<!-- PlayMetric brand strip -->
+<!-- GameStatiq brand strip -->
 <div class="pm-strip">
   <span class="pm-mark">
     <svg viewBox="0 0 64 64" style="color:#E63946"><use href="#ic-pm-mark"/></svg>
-    <span class="pm-name">Play<span class="accent">Metric</span></span>
+    <span class="pm-name">Game<span class="accent">Statiq</span></span>
   </span>
   <span class="pm-tag">Measure every play</span>
 </div>
