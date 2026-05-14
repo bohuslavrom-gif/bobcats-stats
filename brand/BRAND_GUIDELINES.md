@@ -1,4 +1,4 @@
-# PlayMetric — Brand Guidelines
+# GameStatiq — Brand Guidelines
 
 Sport stats platform — measure every play.
 
@@ -35,7 +35,7 @@ Sport stats platform — measure every play.
 
 | Token | Hex | Usage |
 |---|---|---|
-| Sky | `#7AB5D9` | Data series 1, neutral data bars |
+| Sky | `#7AB5D9` | Data series 1, neutral data bars, "active" state |
 | Verde | `#2A9D8F` | Success, positive trend |
 | Spark | `#F4A261` | Warning, secondary chart |
 | Plum | `#7B5BA6` | Tertiary chart series |
@@ -44,6 +44,7 @@ Sport stats platform — measure every play.
 
 - **Ink dominuje** — ~70 % každé kompozice (pozadí, header, body text)
 - **Red akcentuje** — 5–10 %, jen CTA / klíčové highlighty / důležité skóre. Nikdy plochy a velké bloky.
+- **Sky** = "active/in-focus" indikátor (offense bar, secondary buttons, data viz)
 - Na barevných pozadích používej text 8/9 stop ze stejného ramenu, ne plain black.
 - Dark mode je primární pro app shell (PWA na mobilu), light mode pro public/coaches widgety na GitHub Pages.
 
@@ -60,8 +61,8 @@ Inter (Google Fonts) — moderní, vysoce čitelná geometrická sans, výborně
 ### Weights
 
 - **400** — body text
-- **500** — labels, sub-headings, "Play" v wordmarku
-- **700** — headings, "Metric" v wordmarku, key numbers
+- **500** — labels, sub-headings, "Game" v wordmarku
+- **700** — headings, "Statiq" v wordmarku, key numbers
 
 Žádné jiné váhy. Two-weight rule: 500 + 700.
 
@@ -80,19 +81,24 @@ Inter (Google Fonts) — moderní, vysoce čitelná geometrická sans, výborně
 
 | File | Use |
 |---|---|
-| `playmetric-icon.svg` | Standalone icon (data viz cards, inline) |
-| `playmetric-icon-white.svg` | Icon na navy/dark background |
-| `playmetric-icon-mono.svg` | Monochrome (single-color print, watermark) |
-| `playmetric-logo-horizontal.svg` | Hlavičky, faktury, dokumenty (light bg) |
-| `playmetric-logo-horizontal-white.svg` | Hlavičky na dark bg |
-| `playmetric-logo-stacked.svg` | Square / vertical aspect (loading screens) |
-| `playmetric-wordmark.svg` | Pure text variant (constrained heights) |
-| `playmetric-app-icon.svg` | PWA / iOS home screen (512×512) |
-| `playmetric-favicon.svg` | Browser tab (32×32) |
+| `gamestatiq-icon.svg` | Standalone icon (data viz cards, inline) |
+| `gamestatiq-icon-white.svg` | Icon na navy/dark background |
+| `gamestatiq-icon-mono.svg` | Monochrome (single-color print, watermark) |
+| `gamestatiq-logo-horizontal.svg` | Hlavičky, faktury, dokumenty (light bg) |
+| `gamestatiq-logo-horizontal-white.svg` | Hlavičky na dark bg |
+| `gamestatiq-logo-stacked.svg` | Square / vertical aspect (loading screens) |
+| `gamestatiq-wordmark.svg` | Pure text variant (constrained heights) |
+| `gamestatiq-app-icon.svg` | PWA / iOS home screen (512×512) |
+| `gamestatiq-favicon.svg` | Browser tab (32×32) |
+
+### Wordmark struktura
+
+`Game` (weight 500, Ink na light / White na dark) + `Statiq` (weight 700, Signal red).
+Visuální hierarchie: Game = generická sport noun, Statiq = co děláme (analyze stats).
 
 ### Clear space
 
-Minimální clear space kolem loga = výška "M" v "PlayMetric" (cca 1× kapitálka).
+Minimální clear space kolem loga = výška "S" v "Statiq" (cca 1× kapitálka).
 
 ### Minimum size
 
@@ -105,7 +111,7 @@ Minimální clear space kolem loga = výška "M" v "PlayMetric" (cca 1× kapitá
 - ❌ Neměnit barvy elementů loga (modré sloupce, červený sloupec + trojúhelník — fixní)
 - ❌ Nepoužívat na mletých/foto pozadích bez navy plochy pod logem
 - ❌ Neotáčet, nezkosovat, neprotahovat
-- ❌ Nepoužívat starou verzi (Bobcats logo) v PlayMetric kontextu
+- ❌ Nepoužívat starou verzi (Bobcats logo nebo PlayMetric kit) v GameStatiq kontextu
 
 ## Application
 
@@ -113,11 +119,17 @@ Minimální clear space kolem loga = výška "M" v "PlayMetric" (cca 1× kapitá
 
 - Theme color: Ink `#0F1B2D`
 - Status bar: black-translucent na iOS
-- Home screen icon: `playmetric-app-icon.svg`
-- App title: "PlayMetric"
+- Home screen icon: `gamestatiq-app-icon.svg`
+- App title: "GameStatiq"
 
 ### Public / Coaches widgety
 
 - Team brand (např. Bobcats) zůstává dominantní v hero
-- PlayMetric attribution = slim brand bar nahoře (logo vlevo, tagline vpravo)
-- Footer: "Powered by PlayMetric · [link]"
+- GameStatiq attribution = slim brand bar nahoře (logo vlevo, tagline vpravo)
+- Footer: "Powered by GameStatiq · [link]"
+
+## Domains
+
+- `gamestatiq.com` — primary
+- `gamestatiq.eu` — EU defensive
+- `gamestatiq.cz` — local CZ defensive
