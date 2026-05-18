@@ -2447,13 +2447,14 @@ function renderStatsPage() {
 
     // ── Build DB (DEF) stats — DBs from this team's defense ──
     const dbStats = {};
-    // Flag pulls and strip — on opponent plays with defPlayer from this team
+    // Flag pulls and breakups — on opponent plays with defPlayer from this team.
+    // desc format: "Runner run +5 yd · TYPE  (PLAYER) [PlayName]"
+    // Vytáhneme jméno z parantéze, ne celý "TYPE  (PLAYER)" string.
     oppPlays.forEach(p => {
       if (!['run','pass'].includes(p.badge)) return;
-      const defM = p.desc.match(/· ([^·\[]+?)(?:\s*\[|$)/);
+      const defM = p.desc.match(/· [^·\[\(]+\(([^)]+)\)/);
       if (!defM) return;
       const defender = defM[1].trim();
-      // Check if this player belongs to our team
       const isOurPlayer = state.teams[teamKey].players.some(pl => pl.name === defender);
       if (!isOurPlayer) return;
       if (!dbStats[defender]) dbStats[defender] = {flagPull:0, sack:0, brkup:0, int:0};
@@ -3037,6 +3038,11 @@ function startSecondHalf() {
 
 // ═══════════════ NOVÝ ZÁPAS ═══════════════
 function newMatch() {
+  // Anti-duplicate guard — pokud už běží save, nedovol druhý confirm dialog
+  if (isSavingToSheets) {
+    showToast('Probíhá ukládání — vyčkej...', 'red');
+    return;
+  }
   if (!confirm('Uložit zápas do Google Sheets a začít nový?')) return;
 
   // 1) Sestavit payload PŘED resetem
@@ -3195,12 +3201,14 @@ function buildMatchPayload() {
     wrMap[wr].pts += p.badge === 'xp1' ? 1 : 2;
   });
 
-  // DB stats
+  // DB stats — pro export do Sheets list "[Tým] - Hráči" (sloupce Q-T).
+  // desc formát: "Runner run +5 yd · TYPE  (PLAYER) [PlayName]"
+  // Player je v závorkách za defType — vytáhnout jen jeho, ne celý "TYPE  (PLAYER)".
   const dbMap = {};
   const teamANames = state.teams.A.players.map(p => p.name);
   plays.forEach(p => {
     if (!['run','run_td','pass','pass_td'].includes(p.badge)) return;
-    const defM = p.desc && p.desc.match(/· ([^·\[\n]+?)(?:\s*\[|$)/);
+    const defM = p.desc && p.desc.match(/· [^·\[\(]+\(([^)]+)\)/);
     if (!defM) return;
     const def = defM[1].trim();
     if (!teamANames.includes(def)) return;
@@ -3269,6 +3277,10 @@ function buildMatchPayload() {
   };
 }
 
+// Anti-duplicate guard — chrání proti double-tap a souběžným voláním.
+// Když je save in progress, druhé volání skipne.
+let isSavingToSheets = false;
+
 function saveMatchToSheets(onDone, prebuiltPayload) {
   const url = getScriptUrl();
   if (!url) {
@@ -3276,6 +3288,14 @@ function saveMatchToSheets(onDone, prebuiltPayload) {
     if (onDone) onDone();
     return;
   }
+  // Blokuj souběžné save → bez tohohle by double-tap nebo race condition
+  // poslal payload 2× a v Sheets by vznikly duplikáty.
+  if (isSavingToSheets) {
+    console.warn('saveMatchToSheets: již probíhá uložení, skip');
+    if (onDone) onDone();
+    return;
+  }
+  isSavingToSheets = true;
 
   // Pokud volající (newMatch) sestavil payload před resetem, použij ho.
   const payload = prebuiltPayload || buildMatchPayload();
@@ -3283,6 +3303,10 @@ function saveMatchToSheets(onDone, prebuiltPayload) {
 
   // POST místo JSONP — JSONP měl ~12 KB limit URL parametrů.
   // Content-Type 'text/plain' = "simple request" → bez CORS preflightu.
+  // POZOR: žádný no-cors fallback! Apps Script vrací 302 redirect a Android Chrome
+  // PWA někdy neumí přečíst response, ale server data uloží. No-cors retry by
+  // pak data uložil PODRUHÉ (→ duplikáty v Sheets). Místo toho jen ohlásíme chybu;
+  // server-side dedup v GAS (v19+) případné re-save deduplikuje.
   fetch(url, {
     method: 'POST',
     redirect: 'follow',
@@ -3301,22 +3325,14 @@ function saveMatchToSheets(onDone, prebuiltPayload) {
       } else {
         showToast('Odesláno do Sheets (zkontroluj listy)');
       }
-      if (onDone) onDone();
     })
     .catch(err => {
-      // Fallback no-cors fire-and-forget
-      console.warn('Sheets fetch fail, trying no-cors:', err);
-      fetch(url, { method: 'POST', mode: 'no-cors',
-                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body })
-        .then(() => {
-          showToast('Odesláno do Sheets (zkontroluj listy)');
-          if (onDone) onDone();
-        })
-        .catch(err2 => {
-          console.error('Sheets chyba:', err2);
-          showToast('Chyba Sheets: ' + err2.message, 'red');
-          if (onDone) onDone();
-        });
+      console.error('Sheets chyba (server pravděpodobně uložil, ale klient nedostal response):', err);
+      showToast('Chyba při čtení odpovědi — zkontroluj Sheets ručně', 'red');
+    })
+    .finally(() => {
+      isSavingToSheets = false;
+      if (onDone) onDone();
     });
 }
 
@@ -3375,21 +3391,4 @@ if (_restored) {
     const setCls = (id, cls) => { const el = document.getElementById(id); if (el) el.className = cls; };
     const setDisp = (id, v)  => { const el = document.getElementById(id); if (el) el.style.display = v; };
     const setText = (id, t)  => { const el = document.getElementById(id); if (el) el.textContent = t; };
-    setCls('tbtn-a',       'team-btn' + (state.possession==='A'?' active':''));
-    setCls('tbtn-b',       'team-btn' + (state.possession==='B'?' active':''));
-    setDisp('ball-ind-a',  state.possession==='A' ? 'inline' : 'none');
-    setDisp('ball-ind-b',  state.possession==='B' ? 'inline' : 'none');
-    setCls('score-team-a', 'team-score clickable' + (state.possession==='A'?' active':''));
-    setCls('score-team-b', 'team-score clickable' + (state.possession==='B'?' active':''));
-    setText('offense-label', state.teams[state.possession].name + ' · NA ÚTOKU');
-    setText('ptab-a', state.teams.A.name);
-    setText('ptab-b', state.teams.B.name);
-    if (typeof updateTimeoutDots === 'function') updateTimeoutDots();
-    if (typeof renderLog === 'function') renderLog();
-    showToast('Obnoven rozdělaný zápas ✓');
-  } catch(e) { console.warn('restore UI sync:', e); }
-}
-updateFieldDisplay();
-</script>
-</body>
-</html>
+    setCls('tbtn-a'
